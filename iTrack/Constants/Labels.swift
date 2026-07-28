@@ -1,3 +1,11 @@
+//
+//  Labels.swift
+//  iTrack
+//
+//  Created by lilit on 28.07.26.
+//
+
+
 import SwiftUI
 
 // MARK: - UI Localized Strings
