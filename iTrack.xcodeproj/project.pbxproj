@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		134B6F8330190AB50018AA69 /* Swinject in Frameworks */ = {isa = PBXBuildFile; productRef = 134B6F8230190AB50018AA69 /* Swinject */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		134B6F64301909D70018AA69 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				134B6F8330190AB50018AA69 /* Swinject in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +117,7 @@
 			);
 			name = iTrack;
 			packageProductDependencies = (
+				134B6F8230190AB50018AA69 /* Swinject */,
 			);
 			productName = iTrack;
 			productReference = 134B6F54301909D60018AA69 /* iTrack.app */;
@@ -195,6 +201,10 @@
 			);
 			mainGroup = 134B6F4B301909D60018AA69;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				134B6F8030190A4F0018AA69 /* XCRemoteSwiftPackageReference "SwiftFormat" */,
+				134B6F8130190AB50018AA69 /* XCRemoteSwiftPackageReference "swinject" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 134B6F55301909D60018AA69 /* Products */;
 			projectDirPath = "";
@@ -578,6 +588,33 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		134B6F8030190A4F0018AA69 /* XCRemoteSwiftPackageReference "SwiftFormat" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/nicklockwood/SwiftFormat";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.62.1;
+			};
+		};
+		134B6F8130190AB50018AA69 /* XCRemoteSwiftPackageReference "swinject" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/swinject/swinject";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.10.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		134B6F8230190AB50018AA69 /* Swinject */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 134B6F8130190AB50018AA69 /* XCRemoteSwiftPackageReference "swinject" */;
+			productName = Swinject;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 134B6F4C301909D60018AA69 /* Project object */;
 }
