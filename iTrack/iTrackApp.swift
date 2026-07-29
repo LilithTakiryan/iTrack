@@ -14,6 +14,6 @@ struct iTrackApp: App {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(for: [TrackedLocation.self])
+        .modelContainer(for: [Route.self, TrackedLocation.self])
     }
 }

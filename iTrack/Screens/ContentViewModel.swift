@@ -26,7 +26,7 @@ final class ContentViewModel {
 
     @ObservationIgnored private let tracker = LocationTracker()
     @ObservationIgnored private var eventTask: Task<Void, Never>?
-    @ObservationIgnored private var modelContext: ModelContext?
+    @ObservationIgnored private var repository: TrackingRepository?
     @ObservationIgnored private var saveTask: Task<Void, Never>?
 
     @ObservationIgnored private var currentRoute: Route?
@@ -46,7 +46,7 @@ final class ContentViewModel {
     }
 
     func setModelContext(_ context: ModelContext?) {
-        modelContext = context
+        repository = context.map(SwiftDataTrackingRepository.init(context:))
     }
 
     func requestLocationPermission() {
@@ -54,13 +54,10 @@ final class ContentViewModel {
     }
 
     func startTracking() {
-        guard let context = modelContext else { return }
-
-        let route = Route()
-        context.insert(route)
+        guard let repository else { return }
 
         do {
-            try context.save()
+            let route = try repository.createRoute()
             currentRoute = route
         } catch {
             print("Failed to create route:", error)
@@ -131,24 +128,11 @@ final class ContentViewModel {
     }
 
     private func persist(_ location: LocationSnapshot) async {
-        guard let context = modelContext else { return }
+        guard let repository else { return }
         guard let currentRoute else { return }
 
-        let entity = TrackedLocation(
-            latitude: location.latitude,
-            longitude: location.longitude,
-            timestamp: location.timestamp,
-            accuracy: location.accuracy,
-            altitude: nil,
-            speed: nil,
-            course: nil,
-            route: currentRoute
-        )
-
-        context.insert(entity)
-
         do {
-            try context.save()
+            try repository.saveLocation(location, for: currentRoute)
         } catch {
             print("Failed to save location:", error)
         }

@@ -4,8 +4,7 @@ import SwiftData
 struct TrackedLocationsView: View {
     @Environment(\.modelContext) private var modelContext
 
-    @Query(sort: \Route.startedAt, order: .reverse)
-    private var routes: [Route]
+    @State private var routes: [Route] = []
 
     var body: some View {
         List {
@@ -32,6 +31,14 @@ struct TrackedLocationsView: View {
             }
             .onDelete(perform: delete)
         }
+        .task {
+            do {
+                let repository = SwiftDataTrackingRepository(context: modelContext)
+                routes = try repository.fetchRoutes()
+            } catch {
+                print("Failed to fetch routes:", error)
+            }
+        }
         .navigationTitle("Routes")
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -41,12 +48,14 @@ struct TrackedLocationsView: View {
     }
 
     private func delete(offsets: IndexSet) {
-        for index in offsets {
-            modelContext.delete(routes[index])
-        }
+        let selectedRoutes = offsets.map { routes[$0] }
 
         do {
-            try modelContext.save()
+            let repository = SwiftDataTrackingRepository(context: modelContext)
+            for route in selectedRoutes {
+                try repository.deleteRoute(route)
+            }
+            routes.removeAll { selectedRoutes.contains($0) }
         } catch {
             print("Failed to delete routes:", error)
         }
