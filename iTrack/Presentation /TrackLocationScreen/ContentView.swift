@@ -2,17 +2,20 @@
 //  ContentView.swift
 //  iTrack
 //
-//  Created by lilit on 28.07.26.
+//  Created by lilit on 29.07.26.
 //
-
 import SwiftUI
 import UIKit
-import SwiftData
 
 struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
-    @State private var viewModel = ContentViewModel()
-    @Environment(\.modelContext) private var modelContext
+    @State private var viewModel: ContentViewModel
+    private let repository: LocationRepository
+
+    init(viewModel: ContentViewModel, repository: LocationRepository) {
+        _viewModel = State(initialValue: viewModel)
+        self.repository = repository
+    }
 
     var body: some View {
         NavigationStack {
@@ -69,13 +72,15 @@ struct ContentView: View {
                 }
             }
             .navigationTitle(Labels.Navigation.title)
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        NavigationLink("Records") {
-                            TrackedLocationsView()
-                        }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    NavigationLink("Records") {
+                        TrackedLocationsView(
+                            viewModel: TrackedLocationsViewModel(repository: repository)
+                        )
                     }
                 }
+            }
         }
         .alert(Labels.Alerts.permissionTitle, isPresented: $viewModel.showLocationPermissionAlert) {
             Button(Labels.Alerts.openSettings) {
@@ -84,17 +89,10 @@ struct ContentView: View {
             }
             Button(Labels.Alerts.cancel, role: .cancel) {}
         } message: {
-            Text(viewModel.permissionAlertMessage)
+            Text(viewModel.statusText)
         }
         .onChange(of: scenePhase) { _, phase in
             viewModel.handleScenePhase(phase)
         }
-        .task {
-            viewModel.setModelContext(modelContext)
-        }
     }
-}
-
-#Preview {
-    ContentView()
 }
