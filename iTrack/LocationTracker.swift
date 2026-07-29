@@ -35,7 +35,7 @@ struct LocationSnapshot {
 final class LocationTracker: NSObject {
     let events: AsyncStream<LocationTrackerEvent>
     private let eventContinuation: AsyncStream<LocationTrackerEvent>.Continuation
-
+    private var lastEmittedLocation: CLLocation?
     private let manager = CLLocationManager()
     private var isTracking = false
     private var isTrackingRequested = false
@@ -57,11 +57,16 @@ final class LocationTracker: NSObject {
     }
 
     var permissionAlertMessage: String {
-        if !CLLocationManager.locationServicesEnabled() {
-            return "Location Services are turned off on this device. iTrack needs location access to track your route."
+        switch manager.authorizationStatus {
+        case .denied, .restricted:
+            return "Location permission is denied. Please allow location access in Settings."
+        case .authorizedWhenInUse, .authorizedAlways:
+            return "Location permission already granted."
+        case .notDetermined:
+            return "iTrack needs location permission to track your route. Please allow location access in Settings."
+        @unknown default:
+            return "iTrack needs location permission to track your route. Please allow location access in Settings."
         }
-
-        return "iTrack needs location permission to track your route. Please allow location access in Settings."
     }
 
     func startTracking(mode: TrackingMode) {
@@ -69,31 +74,21 @@ final class LocationTracker: NSObject {
         isTrackingRequested = true
         send(.status("Starting", isTrackingRequested: true))
 
-        guard CLLocationManager.locationServicesEnabled() else {
-            requireSettings(message: "Location Services disabled")
+        // Removed guard CLLocationManager.locationServicesEnabled() check
+
+        // If permission hasn't been determined yet, ask and wait for the delegate callback
+        if manager.authorizationStatus == .notDetermined {
+            send(.status("Requesting permission", isTrackingRequested: true))
+            manager.requestWhenInUseAuthorization()
             return
         }
 
-        switch manager.authorizationStatus {
-        case .notDetermined:
-            send(.status("Requesting permission", isTrackingRequested: true))
-            manager.requestWhenInUseAuthorization()
-        case .denied, .restricted:
-            requireSettings(message: "Location permission required")
-        case .authorizedWhenInUse:
-            startWhenInUseTracking()
-        case .authorizedAlways:
-            startUpdates(allowsBackground: selectedMode == .background)
-        @unknown default:
-            requireSettings(message: "Location permission required")
-        }
+        // Defer the rest of the flow to the authorization-change handler to avoid
+        // doing potentially blocking work synchronously here.
+        handleAuthorizationChange()
     }
 
     func requestLocationPermission() {
-        guard CLLocationManager.locationServicesEnabled() else {
-            requireSettings(message: "Location Services disabled")
-            return
-        }
 
         switch manager.authorizationStatus {
         case .notDetermined:
@@ -166,6 +161,22 @@ final class LocationTracker: NSObject {
         send(.requireSettings(message))
     }
 
+    private func handleAuthorizationChange() {
+
+        switch manager.authorizationStatus {
+        case .denied, .restricted:
+            requireSettings(message: "Location permission required")
+        case .authorizedWhenInUse:
+            startWhenInUseTracking()
+        case .authorizedAlways:
+            startUpdates(allowsBackground: selectedMode == .background)
+        case .notDetermined:
+            break
+        @unknown default:
+            requireSettings(message: "Location permission required")
+        }
+    }
+
     private func use(_ location: CLLocation) {
         guard CLLocationCoordinate2DIsValid(location.coordinate),
               location.horizontalAccuracy >= 0,
@@ -175,6 +186,17 @@ final class LocationTracker: NSObject {
             send(.rejectedLocation)
             return
         }
+
+        if let last = lastEmittedLocation {
+            _ = last.distance(from: location)
+
+            // Ignore insignificant movement if less than 5 meters
+//            if distance < 5 { //TODO: uncomment
+//                return
+//            }
+        }
+
+        lastEmittedLocation = location
 
         send(.location(
             LocationSnapshot(
@@ -195,7 +217,7 @@ extension LocationTracker: CLLocationManagerDelegate {
     nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         Task { @MainActor [weak self] in
             guard let self, isTrackingRequested else { return }
-            startTracking(mode: selectedMode)
+            self.handleAuthorizationChange()
         }
     }
 

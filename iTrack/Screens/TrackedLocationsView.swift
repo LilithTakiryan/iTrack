@@ -3,30 +3,36 @@ import SwiftData
 
 struct TrackedLocationsView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \TrackedLocation.timestamp, order: .reverse) private var locations: [TrackedLocation]
+
+    @Query(sort: \Route.startedAt, order: .reverse)
+    private var routes: [Route]
 
     var body: some View {
         List {
-            ForEach(locations, id: \ .id) { loc in
-                VStack(alignment: .leading) {
-                    Text("\(loc.latitude.formatted(.number.precision(.fractionLength(6)))), \(loc.longitude.formatted(.number.precision(.fractionLength(6))))")
-                        .font(.callout)
-                    HStack(spacing: 8) {
-                        Text(loc.timestamp.formatted(date: .abbreviated, time: .standard))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        if let acc = loc.accuracy {
-                            Text(String(format: "• %.1f m", acc))
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
+            ForEach(routes, id: \.id) { route in
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(route.name)
+                        .font(.headline)
+
+                    Text("\(route.locations.count) locations")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    if let first = route.locations.min(by: { $0.timestamp < $1.timestamp }),
+                       let last = route.locations.max(by: { $0.timestamp < $1.timestamp }) {
+
+                        Text(
+                            "\(first.timestamp.formatted(date: .abbreviated, time: .shortened)) - \(last.timestamp.formatted(date: .abbreviated, time: .shortened))"
+                        )
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                     }
                 }
-                .padding(.vertical, 4)
+                .padding(.vertical, 8)
             }
             .onDelete(perform: delete)
         }
-        .navigationTitle("Saved Locations")
+        .navigationTitle("Routes")
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 EditButton()
@@ -36,13 +42,13 @@ struct TrackedLocationsView: View {
 
     private func delete(offsets: IndexSet) {
         for index in offsets {
-            modelContext.delete(locations[index])
+            modelContext.delete(routes[index])
         }
+
         do {
             try modelContext.save()
         } catch {
-            print("Failed to delete locations:", error)
+            print("Failed to delete routes:", error)
         }
     }
 }
-

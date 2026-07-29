@@ -4,6 +4,7 @@ import SwiftData
 @Model
 final class TrackedLocation {
     var id: UUID = UUID()
+
     var latitude: Double
     var longitude: Double
     var timestamp: Date
@@ -12,13 +13,18 @@ final class TrackedLocation {
     var speed: Double?
     var course: Double?
 
-    init(latitude: Double,
-         longitude: Double,
-         timestamp: Date,
-         accuracy: Double? = nil,
-         altitude: Double? = nil,
-         speed: Double? = nil,
-         course: Double? = nil) {
+    var route: Route?
+
+    init(
+        latitude: Double,
+        longitude: Double,
+        timestamp: Date,
+        accuracy: Double? = nil,
+        altitude: Double? = nil,
+        speed: Double? = nil,
+        course: Double? = nil,
+        route: Route? = nil
+    ) {
         self.latitude = latitude
         self.longitude = longitude
         self.timestamp = timestamp
@@ -26,5 +32,6 @@ final class TrackedLocation {
         self.altitude = altitude
         self.speed = speed
         self.course = course
+        self.route = route
     }
 }
