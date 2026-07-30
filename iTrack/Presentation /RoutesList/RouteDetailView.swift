@@ -21,6 +21,12 @@ struct RouteDetailView: View {
     
     @State private var mapPosition: MapCameraPosition = .automatic
     
+    var formattedDistance: String {
+        RouteDistanceCalculator.formattedDistance(
+            for: validLocations
+        )
+    }
+    
     var body: some View {
         ZStack {
             RouteMapView(
@@ -31,7 +37,8 @@ struct RouteDetailView: View {
             RouteInfoCardView(
                 startedAt: route.startedAt,
                 locationCount: validLocations.count,
-                duration: formattedDuration
+                duration: formattedDuration,
+                formattedDistance: formattedDistance
             )
         }
         .navigationTitle("Route")

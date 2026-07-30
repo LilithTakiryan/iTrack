@@ -12,6 +12,7 @@ struct RouteInfoCardView: View {
     let startedAt: Date
     let locationCount: Int
     let duration: String
+    let formattedDistance: String
 
 
     var body: some View {
@@ -62,6 +63,11 @@ struct RouteInfoCardView: View {
 
 
                     Spacer()
+                    
+                    infoColumn(
+                        title: "Distance",
+                        value: formattedDistance
+                    )
                 }
             }
             .padding(16)
