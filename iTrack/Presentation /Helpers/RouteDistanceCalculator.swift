@@ -8,6 +8,20 @@
 
 import CoreLocation
 
+enum DistanceUnit: CaseIterable {
+    case metric
+    case imperial
+    
+    var title: String {
+        switch self {
+        case .metric:
+            return "Metric"
+        case .imperial:
+            return "Imperial"
+        }
+    }
+}
+
 enum RouteDistanceCalculator {
 
     static func distance(
@@ -25,7 +39,6 @@ enum RouteDistanceCalculator {
         var totalDistance: CLLocationDistance = 0
 
         for index in 1..<sortedLocations.count {
-
             let previous = sortedLocations[index - 1]
             let current = sortedLocations[index]
 
@@ -46,18 +59,26 @@ enum RouteDistanceCalculator {
 
 
     static func formattedDistance(
-        for locations: [LocationPoint]
+        for locations: [LocationPoint],
+        unit: DistanceUnit
     ) -> String {
 
         let meters = distance(for: locations)
 
-        if meters >= 1000 {
-            return String(
-                format: "%.2f km",
-                meters / 1000
-            )
-        }
+        switch unit {
+        case .metric:
+            if meters >= 1000 {
+                return String(format: "%.2f km", meters / 1000)
+            }
+            return "\(Int(meters)) m"
 
-        return "\(Int(meters)) m"
+        case .imperial:
+            let feet = meters * 3.28084
+
+            if feet >= 5280 {
+                return String(format: "%.2f mi", feet / 5280)
+            }
+            return "\(Int(feet)) ft"
+        }
     }
 }

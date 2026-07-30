@@ -21,9 +21,12 @@ struct RouteDetailView: View {
     
     @State private var mapPosition: MapCameraPosition = .automatic
     
+    @State private var distanceUnit: DistanceUnit = .metric
+
     var formattedDistance: String {
         RouteDistanceCalculator.formattedDistance(
-            for: validLocations
+            for: validLocations,
+            unit: distanceUnit
         )
     }
     
@@ -43,6 +46,17 @@ struct RouteDetailView: View {
         }
         .navigationTitle("Route")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            Menu {
+                ForEach(DistanceUnit.allCases, id: \.self) { unit in
+                    Button(unit.title) {
+                        distanceUnit = unit
+                    }
+                }
+            } label: {
+                Image(systemName: "ruler")
+            }
+        }
         .onAppear {
             centerMapOnRoute()
         }
