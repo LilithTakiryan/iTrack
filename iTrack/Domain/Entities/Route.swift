@@ -5,10 +5,9 @@
 //  Created by lilit on 29.07.26.
 //
 
-
 import Foundation
 
-public struct Route: Identifiable, Sendable {
+public struct Route: Identifiable, Sendable, Hashable {
     public let id: UUID
     public let startedAt: Date
     public var endedAt: Date?
@@ -24,5 +23,11 @@ public struct Route: Identifiable, Sendable {
         self.startedAt = startedAt
         self.endedAt = endedAt
         self.locations = locations
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(startedAt)
+        hasher.combine(locations.count)
     }
 }

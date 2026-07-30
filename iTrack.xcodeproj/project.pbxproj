@@ -33,9 +33,22 @@
 		134B6F6D301909D70018AA69 /* iTrackUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iTrackUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		13010B8C301A8FF3007BA32B /* Exceptions for "iTrack" folder in "iTrack" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 134B6F53301909D60018AA69 /* iTrack */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		134B6F56301909D60018AA69 /* iTrack */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				13010B8C301A8FF3007BA32B /* Exceptions for "iTrack" folder in "iTrack" target */,
+			);
 			path = iTrack;
 			sourceTree = "<group>";
 		};
@@ -410,6 +423,7 @@
 				DEVELOPMENT_TEAM = 783CB32ZYY;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = iTrack/Info.plist;
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "iTrack uses your location in the background to continue an active tracking session.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "iTrack uses your location while the app is open to record an active tracking session.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -445,6 +459,7 @@
 				DEVELOPMENT_TEAM = 783CB32ZYY;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = iTrack/Info.plist;
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "iTrack uses your location in the background to continue an active tracking session.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "iTrack uses your location while the app is open to record an active tracking session.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

@@ -85,17 +85,24 @@ final class ContentViewModel {
                     self.statusText = status
                     self.isTrackingRequested = isTrackingRequested
                     self.updateSaveTaskIfNeeded()
+                    print(statusText)
 
                 case let .requireSettings(message):
                     self.statusText = message
                     self.isTrackingRequested = false
                     self.showLocationPermissionAlert = true
+                    print(statusText)
+
 
                 case let .locationReceived(location):
                     self.lastLocation = location
+                    print(statusText)
+
 
                 case .rejectedLocation:
                     self.rejectedLocationCount += 1
+                    print(statusText)
+
                 }
             }
         }

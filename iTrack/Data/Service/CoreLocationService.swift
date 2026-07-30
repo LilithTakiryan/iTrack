@@ -137,11 +137,23 @@ public final class CoreLocationService: NSObject, LocationTrackingService {
     }
 
     private func processLocation(_ location: CLLocation) {
-        guard CLLocationCoordinate2DIsValid(location.coordinate),
-              location.horizontalAccuracy >= 0,
-              location.horizontalAccuracy <= 100,
-              abs(location.timestamp.timeIntervalSinceNow) <= 30
-        else {
+        guard CLLocationCoordinate2DIsValid(location.coordinate) else {
+            send(.rejectedLocation)
+            return
+        }
+        
+        guard location.horizontalAccuracy >= 0 && location.horizontalAccuracy <= 100 else {
+            send(.rejectedLocation)
+            return
+        }
+  
+        #if targetEnvironment(simulator)
+        let maxAge: TimeInterval = 120 // 2 minutes for simulator testing
+        #else
+        let maxAge: TimeInterval = 15  // 15 seconds for real-world movement
+        #endif
+        
+        guard abs(location.timestamp.timeIntervalSinceNow) <= maxAge else {
             send(.rejectedLocation)
             return
         }
@@ -157,7 +169,6 @@ public final class CoreLocationService: NSObject, LocationTrackingService {
 
         send(.locationReceived(domainPoint))
     }
-
     private func send(_ event: LocationTrackingEvent) {
         continuation.yield(event)
     }
@@ -181,9 +192,20 @@ extension CoreLocationService: CLLocationManagerDelegate {
     nonisolated public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         Task { @MainActor [weak self] in
             guard let self else { return }
-            if (error as? CLError)?.code == .denied {
+            
+            guard let clError = error as? CLError else {
+                send(.statusUpdated(statusText: error.localizedDescription, isTrackingRequested: isTrackingRequested))
+                return
+            }
+
+            switch clError.code {
+            case .locationUnknown:
+                print("CoreLocation temporary fix delay (error 0). Waiting for update...")
+
+            case .denied:
                 requireSettings(message: "Location permission required")
-            } else {
+
+            default:
                 send(.statusUpdated(statusText: error.localizedDescription, isTrackingRequested: isTrackingRequested))
             }
         }
