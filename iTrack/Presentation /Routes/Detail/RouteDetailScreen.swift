@@ -10,13 +10,13 @@ import MapKit
 
 #Preview {
     NavigationStack {
-        RouteDetailView(
+        RouteDetailScreen(
             route: sampleRoute
         )
     }
 }
 
-struct RouteDetailView: View {
+struct RouteDetailScreen: View {
     let route: Route
     
     @State private var mapPosition: MapCameraPosition = .automatic
@@ -39,6 +39,7 @@ struct RouteDetailView: View {
             
             RouteInfoCardView(
                 startedAt: route.startedAt,
+                endedAt: route.endedAt,
                 locationCount: validLocations.count,
                 duration: formattedDuration,
                 formattedDistance: formattedDistance,
@@ -67,7 +68,7 @@ struct RouteDetailView: View {
 
 
 // MARK: - Helpers
-private extension RouteDetailView {
+private extension RouteDetailScreen {
     
     var formattedDuration: String {
         RouteDurationFormatter.format(

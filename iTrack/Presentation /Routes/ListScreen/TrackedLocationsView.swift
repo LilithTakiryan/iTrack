@@ -22,8 +22,8 @@ struct TrackedLocationsView: View {
                     List {
                         ForEach(viewModel.routes) { route in
                             NavigationLink {
-//                                RouteDetailView(route: route) //TODO: uncomment
-                                RouteDetailView(route: sampleRoute)
+                                RouteDetailScreen(route: route) //TODO: uncomment
+//                                RouteDetailScreen(route: sampleRoute)
                             } label: {
                                 RouteRowView(route: route)
                             }

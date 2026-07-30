@@ -8,8 +8,10 @@
 import Foundation
 
 
-protocol StepCounter {
+public protocol StepCounter: AnyObject {
+    var steps: Int { get }
+    var onStepsChanged: ((Int) -> Void)? { get set }
+
     func start(from date: Date)
     func stop()
-    var steps: Int { get }
 }

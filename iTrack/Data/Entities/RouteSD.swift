@@ -13,7 +13,7 @@ import SwiftData
 public final class RouteSD {
     @Attribute(.unique) public var id: UUID
     public var startedAt: Date
-    public var endedAt: Date?
+    public var endedAt: Date
     public var steps: Int
 
     @Relationship(deleteRule: .cascade, inverse: \LocationPointSD.route)
@@ -22,7 +22,7 @@ public final class RouteSD {
     public init(
         id: UUID = UUID(),
         startedAt: Date = Date(),
-        endedAt: Date? = nil,
+        endedAt: Date = Date(),
         steps: Int = 0
     ) {
         self.id = id

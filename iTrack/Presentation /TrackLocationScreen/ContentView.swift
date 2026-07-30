@@ -59,6 +59,10 @@ struct ContentView: View {
                             Labels.Labels.updated,
                             value: location.timestamp.formatted(date: .omitted, time: .standard)
                         )
+                        LabeledContent(
+                            Labels.Labels.steps,
+                                value: "\(viewModel.steps)"
+                            )
                     } else {
                         Text(Labels.Labels.noLocation)
                             .foregroundStyle(.secondary)

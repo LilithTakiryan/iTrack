@@ -10,14 +10,14 @@ import Foundation
 public struct Route: Identifiable, Sendable, Hashable {
     public let id: UUID
     public let startedAt: Date
-    public var endedAt: Date?
+    public var endedAt: Date
     public var steps: Int
     public var locations: [LocationPoint]
 
     public init(
         id: UUID = UUID(),
         startedAt: Date = Date(),
-        endedAt: Date? = nil,
+        endedAt: Date = Date(),
         steps: Int = 0,
         locations: [LocationPoint] = []
     ) {

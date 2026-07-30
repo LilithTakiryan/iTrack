@@ -23,6 +23,7 @@ final class ContentViewModel {
     var rejectedLocationCount = 0
     var showLocationPermissionAlert = false
     private(set) var isTrackingRequested = false
+    var steps: Int = 0
 
     @ObservationIgnored private let trackerService: LocationTrackingService
     @ObservationIgnored private let repository: LocationRepository

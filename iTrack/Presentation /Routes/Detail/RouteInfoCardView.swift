@@ -10,6 +10,7 @@ import SwiftUI
 struct RouteInfoCardView: View {
 
     let startedAt: Date
+    let endedAt: Date
     let locationCount: Int
     let duration: String
     let formattedDistance: String
@@ -38,6 +39,11 @@ struct RouteInfoCardView: View {
                     Text(
                         startedAt.formatted(
                             date: .abbreviated,
+                            time: .shortened
+                        )
+                        + " - " +
+                        endedAt.formatted(
+                            date: .omitted,
                             time: .shortened
                         )
                     )

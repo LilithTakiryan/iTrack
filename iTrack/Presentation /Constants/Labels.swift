@@ -29,6 +29,7 @@ enum Labels {
         static let count = "Count"
         static let noLocation = "No usable location yet"
         static let metersFormat = "%@ m"
+        static let steps = "Steps"
     }
 
     enum Navigation {
