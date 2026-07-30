@@ -41,7 +41,8 @@ struct RouteDetailView: View {
                 startedAt: route.startedAt,
                 locationCount: validLocations.count,
                 duration: formattedDuration,
-                formattedDistance: formattedDistance
+                formattedDistance: formattedDistance,
+                steps: route.steps
             )
         }
         .navigationTitle("Route")

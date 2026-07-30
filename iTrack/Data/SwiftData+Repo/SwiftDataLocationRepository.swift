@@ -52,4 +52,22 @@ public actor SwiftDataLocationRepository: LocationRepository {
             try modelContext.save()
         }
     }
+    public func updateSteps(
+           _ steps: Int,
+           routeId: UUID
+       ) async throws {
+           let descriptor = FetchDescriptor<RouteSD>(
+               predicate: #Predicate { route in
+                   route.id == routeId
+               }
+           )
+
+           guard let route = try modelContext.fetch(descriptor).first else {
+               throw LocationTrackingMessage.noRouteFound
+           }
+
+           route.steps = steps
+
+           try modelContext.save()
+       }
 }

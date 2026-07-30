@@ -12,12 +12,14 @@ struct iTrackApp: App {
     let container: ModelContainer
     let repository: LocationRepository
     let locationService: LocationTrackingService
+    let stepCounter: StepCounter
 
     init() {
         do {
             container = try ModelContainer(for: RouteSD.self, LocationPointSD.self)
             repository = SwiftDataLocationRepository(modelContainer: container)
             locationService = CoreLocationService()
+            stepCounter = CoreMotionStepCounter()
         } catch {
             fatalError("Failed to initialize SwiftData container: \(error)")
         }
@@ -28,7 +30,7 @@ struct iTrackApp: App {
             ContentView(
                 viewModel: ContentViewModel(
                     trackerService: locationService,
-                    repository: repository
+                    repository: repository, stepCounter: stepCounter
                 ),
                 repository: repository
             )

@@ -6,7 +6,7 @@
 //
 
 
-public enum LocationTrackingMessage: String {
+public enum LocationTrackingMessage: String, Error {
     case starting = "Starting"
     case requestingPermission = "Requesting permission"
     case permissionGranted = "Location permission already granted"
@@ -17,6 +17,7 @@ public enum LocationTrackingMessage: String {
     case pausedInBackground = "Paused in background"
     case trackingInBackground = "Tracking in background"
     case tracking = "Tracking"
+    case noRouteFound = "No route found"
     
     public var rawValue: String {
         switch self {
@@ -30,6 +31,7 @@ public enum LocationTrackingMessage: String {
         case .pausedInBackground: return "Paused in background"
         case .trackingInBackground: return "Tracking in background"
         case .tracking: return "Tracking"
+        case .noRouteFound: return "No route found"
         }
     }
 }

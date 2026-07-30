@@ -29,13 +29,16 @@ final class ContentViewModel {
     @ObservationIgnored private var eventTask: Task<Void, Never>?
     @ObservationIgnored private var saveTask: Task<Void, Never>?
     @ObservationIgnored private var currentRoute: Route?
+    @ObservationIgnored private let stepCounter: StepCounter
 
     init(
         trackerService: LocationTrackingService,
-        repository: LocationRepository
+        repository: LocationRepository,
+        stepCounter: StepCounter
     ) {
         self.trackerService = trackerService
         self.repository = repository
+        self.stepCounter = stepCounter
 
         observeTrackerEvents()
     }
@@ -56,7 +59,11 @@ final class ContentViewModel {
             do {
                 let route = try await repository.createRoute()
                 self.currentRoute = route
+                
+                stepCounter.start(from: route.startedAt)
+
                 await trackerService.startTracking(mode: selectedMode)
+
             } catch {
                 print("Failed to create route:", error)
             }
@@ -66,6 +73,20 @@ final class ContentViewModel {
     func stopTracking() {
         Task {
             await trackerService.stopTracking()
+
+            stepCounter.stop()
+
+            if let route = currentRoute {
+                do {
+                    try await repository.updateSteps(
+                        stepCounter.steps,
+                        routeId: route.id
+                    )
+                } catch {
+                    print("Failed to save steps:", error)
+                }
+            }
+
             self.currentRoute = nil
         }
     }

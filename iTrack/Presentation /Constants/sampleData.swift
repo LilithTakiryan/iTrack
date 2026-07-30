@@ -46,5 +46,6 @@ let sampleRoute = Route(
     id: UUID(),
     startedAt: Date().addingTimeInterval(-900),
     endedAt: Date(),
+    steps: 450,
     locations: sampleLocations
 )
