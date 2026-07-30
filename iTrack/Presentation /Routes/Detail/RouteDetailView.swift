@@ -21,12 +21,12 @@ struct RouteDetailView: View {
     
     @State private var mapPosition: MapCameraPosition = .automatic
     
-    @State private var distanceUnit: DistanceUnit = .metric
+    @AppStorage("distanceUnit") private var distanceUnit = DistanceUnit.metric.rawValue
 
     var formattedDistance: String {
         RouteDistanceCalculator.formattedDistance(
             for: validLocations,
-            unit: distanceUnit
+            unit: DistanceUnit(rawValue: distanceUnit) ?? .metric
         )
     }
     
@@ -50,7 +50,7 @@ struct RouteDetailView: View {
             Menu {
                 ForEach(DistanceUnit.allCases, id: \.self) { unit in
                     Button(unit.title) {
-                        distanceUnit = unit
+                        distanceUnit = unit.rawValue
                     }
                 }
             } label: {

@@ -8,7 +8,7 @@
 
 import CoreLocation
 
-enum DistanceUnit: CaseIterable {
+enum DistanceUnit: String, CaseIterable {
     case metric
     case imperial
     
