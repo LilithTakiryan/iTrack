@@ -4,6 +4,7 @@
 //
 //  Created by lilit on 29.07.26.
 //
+
 import CoreLocation
 import Foundation
 
@@ -36,10 +37,10 @@ public final class CoreLocationService: NSObject, LocationTrackingService {
     public func startTracking(mode: TrackingMode) {
         selectedMode = mode
         isTrackingRequested = true
-        send(.statusUpdated(statusText: "Starting", isTrackingRequested: true))
+        send(.statusUpdated(statusText: LocationTrackingMessage.starting.rawValue, isTrackingRequested: true))
 
         if manager.authorizationStatus == .notDetermined {
-            send(.statusUpdated(statusText: "Requesting permission", isTrackingRequested: true))
+            send(.statusUpdated(statusText: LocationTrackingMessage.requestingPermission.rawValue, isTrackingRequested: true))
             manager.requestWhenInUseAuthorization()
             return
         }
@@ -50,21 +51,21 @@ public final class CoreLocationService: NSObject, LocationTrackingService {
     public func requestPermission() {
         switch manager.authorizationStatus {
         case .notDetermined:
-            send(.statusUpdated(statusText: "Requesting permission", isTrackingRequested: false))
+            send(.statusUpdated(statusText: LocationTrackingMessage.requestingPermission.rawValue, isTrackingRequested: false))
             manager.requestWhenInUseAuthorization()
         case .denied, .restricted:
-            requireSettings(message: "Location permission required")
+            requireSettings(message: .permissionRequired)
         case .authorizedWhenInUse, .authorizedAlways:
-            send(.statusUpdated(statusText: "Location permission already granted", isTrackingRequested: false))
+            send(.statusUpdated(statusText: LocationTrackingMessage.permissionGranted.rawValue, isTrackingRequested: false))
         @unknown default:
-            requireSettings(message: "Location permission required")
+            requireSettings(message: .permissionRequired)
         }
     }
 
     public func stopTracking() {
         isTrackingRequested = false
         stopUpdates()
-        send(.statusUpdated(statusText: "Not tracking", isTrackingRequested: false))
+        send(.statusUpdated(statusText: LocationTrackingMessage.notTracking.rawValue, isTrackingRequested: false))
     }
 
     public func handleScenePhase(isBackground: Bool) {
@@ -72,7 +73,7 @@ public final class CoreLocationService: NSObject, LocationTrackingService {
 
         if isBackground, manager.authorizationStatus != .authorizedAlways {
             stopUpdates()
-            send(.statusUpdated(statusText: "Paused in background", isTrackingRequested: true))
+            send(.statusUpdated(statusText: LocationTrackingMessage.pausedInBackground.rawValue, isTrackingRequested: true))
         } else if !isBackground {
             startTracking(mode: selectedMode)
         }
@@ -85,10 +86,10 @@ public final class CoreLocationService: NSObject, LocationTrackingService {
         }
 
         if didRequestBackgroundPermission {
-            requireSettings(message: "Background permission required")
+            requireSettings(message: .backgroundPermissionRequired)
         } else {
             didRequestBackgroundPermission = true
-            send(.statusUpdated(statusText: "Requesting background permission", isTrackingRequested: true))
+            send(.statusUpdated(statusText: LocationTrackingMessage.requestingBackgroundPermission.rawValue, isTrackingRequested: true))
             manager.requestAlwaysAuthorization()
         }
     }
@@ -101,8 +102,9 @@ public final class CoreLocationService: NSObject, LocationTrackingService {
             isTracking = true
         }
 
+        let statusMessage: LocationTrackingMessage = allowsBackground ? .trackingInBackground : .tracking
         send(.statusUpdated(
-            statusText: allowsBackground ? "Tracking in background" : "Tracking",
+            statusText: statusMessage.rawValue,
             isTrackingRequested: true
         ))
     }
@@ -115,16 +117,16 @@ public final class CoreLocationService: NSObject, LocationTrackingService {
         manager.allowsBackgroundLocationUpdates = false
     }
 
-    private func requireSettings(message: String) {
+    private func requireSettings(message: LocationTrackingMessage) {
         isTrackingRequested = false
         stopUpdates()
-        send(.requireSettings(message: message))
+        send(.requireSettings(message: message.rawValue))
     }
 
     private func handleAuthorizationChange() {
         switch manager.authorizationStatus {
         case .denied, .restricted:
-            requireSettings(message: "Location permission required")
+            requireSettings(message: .permissionRequired)
         case .authorizedWhenInUse:
             startWhenInUseTracking()
         case .authorizedAlways:
@@ -132,7 +134,7 @@ public final class CoreLocationService: NSObject, LocationTrackingService {
         case .notDetermined:
             break
         @unknown default:
-            requireSettings(message: "Location permission required")
+            requireSettings(message: .permissionRequired)
         }
     }
 
@@ -169,6 +171,7 @@ public final class CoreLocationService: NSObject, LocationTrackingService {
 
         send(.locationReceived(domainPoint))
     }
+
     private func send(_ event: LocationTrackingEvent) {
         continuation.yield(event)
     }
@@ -203,7 +206,7 @@ extension CoreLocationService: CLLocationManagerDelegate {
                 print("CoreLocation temporary fix delay (error 0). Waiting for update...")
 
             case .denied:
-                requireSettings(message: "Location permission required")
+                requireSettings(message: .permissionRequired)
 
             default:
                 send(.statusUpdated(statusText: error.localizedDescription, isTrackingRequested: isTrackingRequested))
