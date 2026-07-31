@@ -5,13 +5,13 @@
 //  Created by lilit on 29.07.26.
 //
 import SwiftUI
+import Swinject
 struct TrackedLocationsView: View {
     @State private var viewModel: TrackedLocationsViewModel
 
-
-    init(viewModel: TrackedLocationsViewModel) {
-        _viewModel = State(initialValue: viewModel)
-    }
+    init(viewModel: TrackedLocationsViewModel = AppContainer.shared.container.resolve(TrackedLocationsViewModel.self)!) {
+            self.viewModel = viewModel
+        }
 
     var body: some View {
         Group {
@@ -22,8 +22,7 @@ struct TrackedLocationsView: View {
                     List {
                         ForEach(viewModel.routes) { route in
                             NavigationLink {
-                                RouteDetailScreen(route: route) //TODO: uncomment
-//                                RouteDetailScreen(route: sampleRoute)
+                                RouteDetailScreen(route: route)
                             } label: {
                                 RouteRowView(route: route)
                             }

@@ -6,20 +6,21 @@
 //
 import SwiftUI
 import MapKit
+import Swinject
 
 struct TrackLocationScreen: View {
     @Environment(\.scenePhase) private var scenePhase
-    @State private var viewModel: TrackLocationViewModel
     @State private var mapPosition: MapCameraPosition = .automatic
     @AppStorage("distanceUnit") private var distanceUnit = DistanceUnit.metric.rawValue
     
-    private let repository: LocationRepository
-
-    init(viewModel: TrackLocationViewModel, repository: LocationRepository) {
-        self._viewModel = State(initialValue: viewModel)
-        self.repository = repository
+    @Bindable var viewModel: TrackLocationViewModel
+    
+    init(
+        viewModel: TrackLocationViewModel = AppContainer.shared.container.resolve(TrackLocationViewModel.self)!
+    ) {
+        self.viewModel = viewModel
     }
-
+    
     var body: some View {
         NavigationStack {
             Form {
@@ -47,12 +48,12 @@ struct TrackLocationScreen: View {
                     }
                     .listRowInsets(EdgeInsets())
                 }
-
+                
                 LastLocationSection(
                     location: viewModel.lastLocation,
                     steps: viewModel.steps
                 )
-
+                
                 Section {
                     Picker(Labels.Labels.mode, selection: $viewModel.selectedMode) {
                         ForEach(TrackingMode.allCases) { mode in
@@ -63,14 +64,14 @@ struct TrackLocationScreen: View {
                 } header: {
                     Text(Labels.Labels.mode)
                 }
-
+                
                 Section {
                     TrackButton(viewModel: viewModel)
                         .frame(maxWidth: .infinity)
                 }
                 .listRowBackground(Color.clear)
                 .listRowInsets(EdgeInsets())
-
+                
                 if viewModel.rejectedLocationCount > 0 {
                     Section(Labels.Sections.rejectedUpdates) {
                         LabeledContent(
@@ -85,7 +86,7 @@ struct TrackLocationScreen: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink("Records") {
-                        TrackedLocationsDestination(repository: repository)
+                        TrackedLocationsView()
                     }
                 }
             }
@@ -119,16 +120,3 @@ struct TrackLocationScreen: View {
     }
 }
 
-// MARK: - Private Navigation Destinations
-
-private struct TrackedLocationsDestination: View {
-    @State private var viewModel: TrackedLocationsViewModel
-
-    init(repository: LocationRepository) {
-        _viewModel = State(initialValue: TrackedLocationsViewModel(repository: repository))
-    }
-
-    var body: some View {
-        TrackedLocationsView(viewModel: viewModel)
-    }
-}

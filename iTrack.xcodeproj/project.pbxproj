@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		134B6F8330190AB50018AA69 /* Swinject in Frameworks */ = {isa = PBXBuildFile; productRef = 134B6F8230190AB50018AA69 /* Swinject */; };
+		13A38771301D42240020E686 /* AppContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13A38770301D417C0020E686 /* AppContainer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -31,6 +32,7 @@
 		134B6F54301909D60018AA69 /* iTrack.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iTrack.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		134B6F63301909D70018AA69 /* iTrackTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iTrackTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		134B6F6D301909D70018AA69 /* iTrackUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iTrackUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		13A38770301D417C0020E686 /* AppContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContainer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -93,9 +95,9 @@
 		13A3876B301D3F370020E686 /* Exceptions for "Routes" folder in "iTrack" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Detail/Reusables/RouteInfoCardView.swift,
+				Detail/Reusables/RouteMapView.swift,
 				Detail/RouteDetailScreen.swift,
-				Detail/RouteInfoCardView.swift,
-				Detail/RouteMapView.swift,
 				ListScreen/Reusables/EmptyListView.swift,
 				ListScreen/Reusables/RouteRowView.swift,
 				ListScreen/TrackedLocationsView.swift,
@@ -310,6 +312,7 @@
 		13A3870F301D3F130020E686 /* DI */ = {
 			isa = PBXGroup;
 			children = (
+				13A38770301D417C0020E686 /* AppContainer.swift */,
 			);
 			path = DI;
 			sourceTree = "<group>";
@@ -466,6 +469,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				13A38771301D42240020E686 /* AppContainer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
