@@ -6,10 +6,10 @@
 //
 import SwiftUI
 import Swinject
-struct TrackedLocationsView: View {
-    @State private var viewModel: TrackedLocationsViewModel
+struct LocationsListScreen: View {
+    @State private var viewModel: LocationsListViewModel
 
-    init(viewModel: TrackedLocationsViewModel = AppContainer.shared.container.resolve(TrackedLocationsViewModel.self)!) {
+    init(viewModel: LocationsListViewModel = AppContainer.shared.container.resolve(LocationsListViewModel.self)!) {
             self.viewModel = viewModel
         }
 

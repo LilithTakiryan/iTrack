@@ -9,7 +9,7 @@ import Observation
 
 @MainActor
 @Observable
-final class TrackedLocationsViewModel {
+final class LocationsListViewModel {
     var routes: [Route] = []
     
     @ObservationIgnored private let repository: LocationRepository

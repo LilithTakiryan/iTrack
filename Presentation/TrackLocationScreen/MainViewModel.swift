@@ -8,11 +8,11 @@ import Foundation
 import Observation
 import SwiftUI
 import MapKit
-
+import Swinject
 
 @MainActor
 @Observable
-final class TrackLocationViewModel {
+final class MainViewModel {
     var selectedMode: TrackingMode = .foreground {
         didSet {
             guard isTrackingRequested, selectedMode != oldValue else { return }
@@ -30,7 +30,7 @@ final class TrackLocationViewModel {
     var showLocationPermissionAlert = false
     private(set) var isTrackingRequested = false
     var steps: Int = 0
-
+    private let startTrackingUseCase: StartTrackingUseCaseProtocol
     @ObservationIgnored private let trackerService: LocationTrackingService
     @ObservationIgnored private let repository: LocationRepository
     @ObservationIgnored private let stepCounter: StepCounter
@@ -39,11 +39,14 @@ final class TrackLocationViewModel {
     @ObservationIgnored private var modeChangeTask: Task<Void, Never>?
     @ObservationIgnored private var currentRoute: Route?
 
+    @MainActor
     init(
+        startTrackingUseCase: StartTrackingUseCaseProtocol,
         trackerService: LocationTrackingService,
         repository: LocationRepository,
         stepCounter: StepCounter
     ) {
+        self.startTrackingUseCase = startTrackingUseCase
         self.trackerService = trackerService
         self.repository = repository
         self.stepCounter = stepCounter
@@ -63,22 +66,19 @@ final class TrackLocationViewModel {
     }
 
     func startTracking() {
-        Task {
-            do {
-                let route = try await repository.createRoute()
-                self.currentRoute = route
-                self.liveLocations.removeAll()
-                self.lastLocation = nil
-                self.rejectedLocationCount = 0
-                self.steps = 0
-
-                stepCounter.start(from: route.startedAt)
-                await trackerService.startTracking(mode: selectedMode)
-            } catch {
-                print("Failed to create route:", error)
+            Task {
+                do {
+                    let route = try await startTrackingUseCase.execute(mode: selectedMode)
+                    self.currentRoute = route
+                    self.liveLocations.removeAll()
+                    self.lastLocation = nil
+                    self.rejectedLocationCount = 0
+                    self.steps = 0
+                } catch {
+                    print("Failed to start route:", error)
+                }
             }
         }
-    }
 
     func stopTracking() {
         Task {
@@ -126,7 +126,6 @@ final class TrackLocationViewModel {
                     self.liveLocations.append(location)
                     
                     if let route = self.currentRoute {
-                        // Sequential, order-preserved persistence
                         await self.persist(location, for: route)
                     }
 
@@ -146,7 +145,20 @@ final class TrackLocationViewModel {
     }
 }
 
-extension TrackLocationViewModel {
+@MainActor
+extension MainViewModel {
+    static func makeDefault(trackerService: LocationTrackingService, repository: LocationRepository, stepCounter: StepCounter) -> MainViewModel {
+        let startTrackingUseCase = AppContainer.shared.container.resolve(StartTrackingUseCaseProtocol.self)!
+        return MainViewModel(
+            startTrackingUseCase: startTrackingUseCase,
+            trackerService: trackerService,
+            repository: repository,
+            stepCounter: stepCounter
+        )
+    }
+}
+
+extension MainViewModel {
     
     var validLocations: [LocationPoint] {
         liveLocations

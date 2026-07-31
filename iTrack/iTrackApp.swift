@@ -12,7 +12,7 @@ import SwiftData
 struct iTrackApp: App {
     var body: some Scene {
         WindowGroup {
-            TrackLocationScreen()
+            MainScreen()
         }
         .modelContainer(
             AppContainer.shared.container.resolve(ModelContainer.self)!)

@@ -7,7 +7,7 @@
 import SwiftUI
 
 struct TrackButton: View {
-    let viewModel: TrackLocationViewModel
+    let viewModel: MainViewModel
     
     var body: some View {
     

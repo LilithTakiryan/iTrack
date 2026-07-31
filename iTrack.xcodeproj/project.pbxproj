@@ -98,22 +98,22 @@
 				Detail/Reusables/RouteInfoCardView.swift,
 				Detail/Reusables/RouteMapView.swift,
 				Detail/RouteDetailScreen.swift,
+				ListScreen/LocationsListScreen.swift,
+				ListScreen/LocationsListViewModel.swift,
 				ListScreen/Reusables/EmptyListView.swift,
 				ListScreen/Reusables/RouteRowView.swift,
-				ListScreen/TrackedLocationsView.swift,
-				ListScreen/TrackedLocationsViewModel.swift,
 			);
 			target = 134B6F53301909D60018AA69 /* iTrack */;
 		};
 		13A3876C301D3F370020E686 /* Exceptions for "TrackLocationScreen" folder in "iTrack" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				MainScreen.swift,
+				MainViewModel.swift,
 				Reusables/LastLocationSection.swift,
 				Reusables/MiniTelemetryCard.swift,
 				Reusables/StatusBadgeView.swift,
 				Reusables/TrackButton.swift,
-				TrackLocationScreen.swift,
-				TrackLocationViewModel.swift,
 			);
 			target = 134B6F53301909D60018AA69 /* iTrack */;
 		};

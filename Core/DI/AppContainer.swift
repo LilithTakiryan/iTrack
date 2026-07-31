@@ -4,8 +4,6 @@
 //
 //  Created by lilit on 01.08.26.
 //
-
-
 import Foundation
 import Swinject
 import SwiftData
@@ -41,20 +39,31 @@ final class AppContainer {
         container.register(StepCounter.self) { _ in
             CoreMotionStepCounter()
         }.inObjectScope(.container)
-
+        
+        // MARK: - Use Cases
+        container.register(StartTrackingUseCaseProtocol.self) { r in
+            StartTrackingUseCase(
+                repository: r.resolve(LocationRepository.self)!,
+                trackerService: r.resolve(LocationTrackingService.self)!,
+                stepCounter: r.resolve(StepCounter.self)!
+            )
+        }
+        
         // MARK: - View Models
-        container.register(TrackLocationViewModel.self) { r in
-            TrackLocationViewModel(
+        container.register(MainViewModel.self) { r in
+            MainViewModel(
+                startTrackingUseCase:r.resolve(StartTrackingUseCaseProtocol.self)!,
                 trackerService: r.resolve(LocationTrackingService.self)!,
                 repository: r.resolve(LocationRepository.self)!,
                 stepCounter: r.resolve(StepCounter.self)!
             )
         }
-        container.register(TrackedLocationsViewModel.self) { r in
-            TrackedLocationsViewModel(
+        container.register(LocationsListViewModel.self) { r in
+            LocationsListViewModel(
                 repository: r.resolve(LocationRepository.self)!
             )
         }
+        
     }
     
 }

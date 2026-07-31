@@ -8,17 +8,19 @@ import SwiftUI
 import MapKit
 import Swinject
 
-struct TrackLocationScreen: View {
+struct MainScreen: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var mapPosition: MapCameraPosition = .automatic
     @AppStorage("distanceUnit") private var distanceUnit = DistanceUnit.metric.rawValue
     
-    @Bindable var viewModel: TrackLocationViewModel
-    
-    init(
-        viewModel: TrackLocationViewModel = AppContainer.shared.container.resolve(TrackLocationViewModel.self)!
-    ) {
-        self.viewModel = viewModel
+    @Bindable var viewModel: MainViewModel
+    @MainActor
+    init(viewModel: MainViewModel? = nil) {
+        if let viewModel {
+            self.viewModel = viewModel
+        } else {
+            self.viewModel = AppContainer.shared.container.resolve(MainViewModel.self)!
+        }
     }
     
     var body: some View {
@@ -86,7 +88,7 @@ struct TrackLocationScreen: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink("Records") {
-                        TrackedLocationsView()
+                        LocationsListScreen()
                     }
                 }
             }
