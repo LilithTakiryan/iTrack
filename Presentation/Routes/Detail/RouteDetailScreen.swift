@@ -16,6 +16,7 @@ import MapKit
     }
 }
 
+// This is a dumb screen, it only receives data object
 struct RouteDetailScreen: View {
     let route: Route
     

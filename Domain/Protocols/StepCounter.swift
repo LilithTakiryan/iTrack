@@ -13,5 +13,5 @@ public protocol StepCounter: AnyObject {
     var onStepsChanged: ((Int) -> Void)? { get set }
 
     func start(from date: Date)
-    func stop()
+    func stop() -> Int
 }

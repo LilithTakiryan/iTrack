@@ -22,7 +22,7 @@ final class MainViewModel {
             }
         }
     }
-
+    
     var statusText = "Not tracking"
     var lastLocation: LocationPoint?
     var liveLocations: [LocationPoint] = []
@@ -31,6 +31,7 @@ final class MainViewModel {
     private(set) var isTrackingRequested = false
     var steps: Int = 0
     private let startTrackingUseCase: StartTrackingUseCaseProtocol
+    private let stopTrackingUseCase: StopTrackingUseCaseProtocol
     @ObservationIgnored private let trackerService: LocationTrackingService
     @ObservationIgnored private let repository: LocationRepository
     @ObservationIgnored private let stepCounter: StepCounter
@@ -38,75 +39,73 @@ final class MainViewModel {
     @ObservationIgnored private var eventTask: Task<Void, Never>?
     @ObservationIgnored private var modeChangeTask: Task<Void, Never>?
     @ObservationIgnored private var currentRoute: Route?
-
+    
     @MainActor
     init(
         startTrackingUseCase: StartTrackingUseCaseProtocol,
+        stopTrackingUseCase: StopTrackingUseCaseProtocol,
         trackerService: LocationTrackingService,
         repository: LocationRepository,
         stepCounter: StepCounter
     ) {
         self.startTrackingUseCase = startTrackingUseCase
+        self.stopTrackingUseCase = stopTrackingUseCase
         self.trackerService = trackerService
         self.repository = repository
         self.stepCounter = stepCounter
-
+        
         observeTrackerEvents()
     }
-
+    
     deinit {
         eventTask?.cancel()
         modeChangeTask?.cancel()
     }
-
+    
     func requestLocationPermission() {
         Task {
             await trackerService.requestPermission()
         }
     }
-
+    
     func startTracking() {
-            Task {
-                do {
-                    let route = try await startTrackingUseCase.execute(mode: selectedMode)
-                    self.currentRoute = route
-                    self.liveLocations.removeAll()
-                    self.lastLocation = nil
-                    self.rejectedLocationCount = 0
-                    self.steps = 0
-                } catch {
-                    print("Failed to start route:", error)
-                }
+        Task {
+            do {
+                let route = try await startTrackingUseCase.execute(mode: selectedMode)
+                self.currentRoute = route
+                self.liveLocations.removeAll()
+                self.lastLocation = nil
+                self.rejectedLocationCount = 0
+                self.steps = 0
+            } catch {
+                print("Failed to start route:", error)
             }
         }
-
+    }
+    
     func stopTracking() {
         Task {
-            await trackerService.stopTracking()
-            stepCounter.stop()
-
             guard let route = currentRoute else { return }
-
+            
             do {
-                try await repository.updateSteps(
-                    stepCounter.steps,
-                    routeId: route.id
-                )
+                let finalSteps = try await stopTrackingUseCase.execute(routeId: route.id)
+                
+                self.steps = finalSteps
             } catch {
-                print("Failed to finalize route in DB:", error)
+                print("Failed to stop route:", error)
             }
-
+            
             self.currentRoute = nil
             self.isTrackingRequested = false
         }
     }
-
+    
     func handleScenePhase(_ phase: ScenePhase) {
         Task {
             await trackerService.handleScenePhase(isBackground: phase == .background)
         }
     }
-
+    
     private func observeTrackerEvents() {
         eventTask = Task { [weak self] in
             guard let self else { return }
@@ -115,12 +114,12 @@ final class MainViewModel {
                 case let .statusUpdated(status, isTrackingRequested):
                     self.statusText = status
                     self.isTrackingRequested = isTrackingRequested
-
+                    
                 case let .requireSettings(message):
                     self.statusText = message
                     self.isTrackingRequested = false
                     self.showLocationPermissionAlert = true
-
+                    
                 case let .locationReceived(location):
                     self.lastLocation = location
                     self.liveLocations.append(location)
@@ -128,14 +127,14 @@ final class MainViewModel {
                     if let route = self.currentRoute {
                         await self.persist(location, for: route)
                     }
-
+                    
                 case .rejectedLocation:
                     self.rejectedLocationCount += 1
                 }
             }
         }
     }
-
+    
     private func persist(_ location: LocationPoint, for route: Route) async {
         do {
             try await repository.addLocation(location, to: route.id)
@@ -149,8 +148,10 @@ final class MainViewModel {
 extension MainViewModel {
     static func makeDefault(trackerService: LocationTrackingService, repository: LocationRepository, stepCounter: StepCounter) -> MainViewModel {
         let startTrackingUseCase = AppContainer.shared.container.resolve(StartTrackingUseCaseProtocol.self)!
+        let stopTrackingUseCase = AppContainer.shared.container.resolve(StopTrackingUseCaseProtocol.self)!
         return MainViewModel(
             startTrackingUseCase: startTrackingUseCase,
+            stopTrackingUseCase: stopTrackingUseCase,
             trackerService: trackerService,
             repository: repository,
             stepCounter: stepCounter
@@ -165,7 +166,7 @@ extension MainViewModel {
             .filter { CLLocationCoordinate2DIsValid($0.coordinate) }
             .sorted { $0.timestamp < $1.timestamp }
     }
-
+    
     func formattedDistance(unitRawValue: String) -> String {
         let unit = DistanceUnit(rawValue: unitRawValue) ?? .metric
         return RouteDistanceCalculator.formattedDistance(
