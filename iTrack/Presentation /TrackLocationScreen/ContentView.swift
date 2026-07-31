@@ -5,88 +5,76 @@
 //  Created by lilit on 29.07.26.
 //
 import SwiftUI
-import UIKit
+import MapKit
 
 struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
-    @State private var viewModel: ContentViewModel
+    @State var viewModel: ContentViewModel
     private let repository: LocationRepository
 
+    @State private var mapPosition: MapCameraPosition = .automatic
+
     init(viewModel: ContentViewModel, repository: LocationRepository) {
-        _viewModel = State(initialValue: viewModel)
+        self._viewModel = State(wrappedValue: viewModel)
         self.repository = repository
     }
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section(Labels.Sections.tracking) {
-                    Picker(Labels.Labels.mode, selection: $viewModel.selectedMode) {
-                        ForEach(TrackingMode.allCases) { mode in
-                            Text(mode.title).tag(mode)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-
-                    LabeledContent(Labels.Labels.status, value: viewModel.statusText)
-
-                    if viewModel.isTrackingRequested {
-                        Button(Labels.Labels.stopTracking, role: .destructive) {
-                            viewModel.stopTracking()
-                        }
-                    } else {
-                        Button(Labels.Labels.startTracking) {
-                            viewModel.startTracking()
-                        }
-                    }
+            VStack(spacing: 0) {
+                LiveMapView(
+                    locations: viewModel.liveLocations,
+                    mapPosition: $mapPosition
+                )
+                .overlay(alignment: .topTrailing) {
+                    StatusBadge(
+                        isActive: viewModel.isTrackingRequested,
+                        title: viewModel.statusText
+                    )
+                    .padding(16)
                 }
 
-                Section(Labels.Sections.lastLocation) {
-                    if let location = viewModel.lastLocation {
-                        LabeledContent(
-                            Labels.Labels.latitude,
-                            value: location.latitude.formatted(.number.precision(.fractionLength(6)))
-                        )
-                        LabeledContent(
-                            Labels.Labels.longitude,
-                            value: location.longitude.formatted(.number.precision(.fractionLength(6)))
-                        )
-                        LabeledContent(
-                            Labels.Labels.accuracy,
-                            value: String(format: Labels.Labels.metersFormat, location.accuracy.formatted(.number.precision(.fractionLength(1))))
-                        )
-                        LabeledContent(
-                            Labels.Labels.updated,
-                            value: location.timestamp.formatted(date: .omitted, time: .standard)
-                        )
-                        LabeledContent(
-                            Labels.Labels.steps,
-                                value: "\(viewModel.steps)"
+                Form {
+                    LastLocationSection(
+                        location: viewModel.lastLocation,
+                        steps: viewModel.steps
+                    )
+                    
+                    Section {
+                        Picker(Labels.Labels.mode, selection: $viewModel.selectedMode) {
+                            ForEach(TrackingMode.allCases) { mode in
+                                Text(mode.title).tag(mode)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        
+                        TrackButton(viewModel: viewModel)
+                    }
+                    
+                    if viewModel.rejectedLocationCount > 0 {
+                        Section(Labels.Sections.rejectedUpdates) {
+                            LabeledContent(
+                                Labels.Labels.count,
+                                value: viewModel.rejectedLocationCount.formatted()
                             )
-                    } else {
-                        Text(Labels.Labels.noLocation)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
-                if viewModel.rejectedLocationCount > 0 {
-                    Section(Labels.Sections.rejectedUpdates) {
-                        LabeledContent(Labels.Labels.count, value: "\(viewModel.rejectedLocationCount)")
+                        }
                     }
                 }
             }
             .navigationTitle(Labels.Navigation.title)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink("Records") {
-                        TrackedLocationsView(
-                            viewModel: TrackedLocationsViewModel(repository: repository)
-                        )
+                        TrackedLocationsDestination(repository: repository)
                     }
                 }
             }
         }
-        .alert(Labels.Alerts.permissionTitle, isPresented: $viewModel.showLocationPermissionAlert) {
+        .alert(
+            Labels.Alerts.permissionTitle,
+            isPresented: $viewModel.showLocationPermissionAlert
+        ) {
             Button(Labels.Alerts.openSettings) {
                 guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
                 UIApplication.shared.open(url)
@@ -98,5 +86,31 @@ struct ContentView: View {
         .onChange(of: scenePhase) { _, phase in
             viewModel.handleScenePhase(phase)
         }
+        .onChange(of: viewModel.lastLocation) { _, newLocation in
+            if let newLocation {
+                withAnimation(.easeInOut) {
+                    mapPosition = .camera(
+                        MapCamera(
+                            centerCoordinate: newLocation.coordinate,
+                            distance: 600
+                        )
+                    )
+                }
+            }
+        }
+    }
+}
+
+private struct TrackedLocationsDestination: View {
+    let repository: LocationRepository
+    @State private var viewModel: TrackedLocationsViewModel
+
+    init(repository: LocationRepository) {
+        self.repository = repository
+        _viewModel = State(wrappedValue: TrackedLocationsViewModel(repository: repository))
+    }
+
+    var body: some View {
+        TrackedLocationsView(viewModel: viewModel)
     }
 }

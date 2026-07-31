@@ -7,6 +7,8 @@
 import Foundation
 import Observation
 import SwiftUI
+import MapKit
+
 
 @MainActor
 @Observable
@@ -14,12 +16,16 @@ final class ContentViewModel {
     var selectedMode: TrackingMode = .foreground {
         didSet {
             guard isTrackingRequested, selectedMode != oldValue else { return }
-            Task { await trackerService.startTracking(mode: selectedMode) }
+            modeChangeTask?.cancel()
+            modeChangeTask = Task {
+                await trackerService.startTracking(mode: selectedMode)
+            }
         }
     }
 
     var statusText = "Not tracking"
     var lastLocation: LocationPoint?
+    var liveLocations: [LocationPoint] = []
     var rejectedLocationCount = 0
     var showLocationPermissionAlert = false
     private(set) var isTrackingRequested = false
@@ -27,10 +33,11 @@ final class ContentViewModel {
 
     @ObservationIgnored private let trackerService: LocationTrackingService
     @ObservationIgnored private let repository: LocationRepository
-    @ObservationIgnored private var eventTask: Task<Void, Never>?
-    @ObservationIgnored private var saveTask: Task<Void, Never>?
-    @ObservationIgnored private var currentRoute: Route?
     @ObservationIgnored private let stepCounter: StepCounter
+    
+    @ObservationIgnored private var eventTask: Task<Void, Never>?
+    @ObservationIgnored private var modeChangeTask: Task<Void, Never>?
+    @ObservationIgnored private var currentRoute: Route?
 
     init(
         trackerService: LocationTrackingService,
@@ -46,7 +53,7 @@ final class ContentViewModel {
 
     deinit {
         eventTask?.cancel()
-        saveTask?.cancel()
+        modeChangeTask?.cancel()
     }
 
     func requestLocationPermission() {
@@ -60,11 +67,13 @@ final class ContentViewModel {
             do {
                 let route = try await repository.createRoute()
                 self.currentRoute = route
-                
+                self.liveLocations.removeAll()
+                self.lastLocation = nil
+                self.rejectedLocationCount = 0
+                self.steps = 0
+
                 stepCounter.start(from: route.startedAt)
-
                 await trackerService.startTracking(mode: selectedMode)
-
             } catch {
                 print("Failed to create route:", error)
             }
@@ -74,21 +83,21 @@ final class ContentViewModel {
     func stopTracking() {
         Task {
             await trackerService.stopTracking()
-
             stepCounter.stop()
 
-            if let route = currentRoute {
-                do {
-                    try await repository.updateSteps(
-                        stepCounter.steps,
-                        routeId: route.id
-                    )
-                } catch {
-                    print("Failed to save steps:", error)
-                }
+            guard let route = currentRoute else { return }
+
+            do {
+                try await repository.updateSteps(
+                    stepCounter.steps,
+                    routeId: route.id
+                )
+            } catch {
+                print("Failed to finalize route in DB:", error)
             }
 
             self.currentRoute = nil
+            self.isTrackingRequested = false
         }
     }
 
@@ -106,51 +115,25 @@ final class ContentViewModel {
                 case let .statusUpdated(status, isTrackingRequested):
                     self.statusText = status
                     self.isTrackingRequested = isTrackingRequested
-                    self.updateSaveTaskIfNeeded()
-                    print(statusText)
 
                 case let .requireSettings(message):
                     self.statusText = message
                     self.isTrackingRequested = false
                     self.showLocationPermissionAlert = true
-                    print(statusText)
-
 
                 case let .locationReceived(location):
                     self.lastLocation = location
-                    print(statusText)
-
+                    self.liveLocations.append(location)
+                    
+                    if let route = self.currentRoute {
+                        // Sequential, order-preserved persistence
+                        await self.persist(location, for: route)
+                    }
 
                 case .rejectedLocation:
                     self.rejectedLocationCount += 1
-                    print(statusText)
-
                 }
             }
-        }
-    }
-
-    private func updateSaveTaskIfNeeded() {
-        let shouldRun = isTrackingRequested && statusText.contains("Tracking")
-
-        if shouldRun {
-            if saveTask == nil {
-                saveTask = Task { [weak self] in
-                    await self?.saveLoop()
-                }
-            }
-        } else {
-            saveTask?.cancel()
-            saveTask = nil
-        }
-    }
-
-    private func saveLoop() async {
-        while !Task.isCancelled {
-            if let location = lastLocation, let currentRoute {
-                await persist(location, for: currentRoute)
-            }
-            try? await Task.sleep(nanoseconds: 60 * 1_000_000_000)
         }
     }
 
