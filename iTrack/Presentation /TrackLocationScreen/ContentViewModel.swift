@@ -145,3 +145,20 @@ final class ContentViewModel {
         }
     }
 }
+
+extension ContentViewModel {
+    
+    var validLocations: [LocationPoint] {
+        liveLocations
+            .filter { CLLocationCoordinate2DIsValid($0.coordinate) }
+            .sorted { $0.timestamp < $1.timestamp }
+    }
+
+    func formattedDistance(unitRawValue: String) -> String {
+        let unit = DistanceUnit(rawValue: unitRawValue) ?? .metric
+        return RouteDistanceCalculator.formattedDistance(
+            for: validLocations,
+            unit: unit
+        )
+    }
+}
