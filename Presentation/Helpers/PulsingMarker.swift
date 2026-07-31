@@ -10,9 +10,9 @@ import SwiftUI
 struct PulsingMarker: View {
     let icon: String
     let color: Color
-
+    
     @State private var animate = false
-
+    
     var body: some View {
         Image(systemName: icon)
             .font(.title)

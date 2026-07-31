@@ -17,13 +17,13 @@ public actor SwiftDataLocationRepository: LocationRepository {
         try modelContext.save()
         return routeSD.toDomain()
     }
-
+    
     public func addLocation(_ location: LocationPoint, to routeId: UUID) throws {
         var descriptor = FetchDescriptor<RouteSD>(predicate: #Predicate { $0.id == routeId })
         descriptor.fetchLimit = 1
-
+        
         guard let routeSD = try modelContext.fetch(descriptor).first else { return }
-
+        
         let pointSD = LocationPointSD(
             id: location.id,
             latitude: location.latitude,
@@ -32,42 +32,42 @@ public actor SwiftDataLocationRepository: LocationRepository {
             timestamp: location.timestamp,
             route: routeSD
         )
-
+        
         modelContext.insert(pointSD)
         try modelContext.save()
     }
-
+    
     public func fetchRoutes() throws -> [Route] {
         let descriptor = FetchDescriptor<RouteSD>(sortBy: [SortDescriptor(\.startedAt, order: .reverse)])
         let results = try modelContext.fetch(descriptor)
         return results.map { $0.toDomain() }
     }
-
+    
     public func deleteRoute(id: UUID) throws {
         var descriptor = FetchDescriptor<RouteSD>(predicate: #Predicate { $0.id == id })
         descriptor.fetchLimit = 1
-
+        
         if let route = try modelContext.fetch(descriptor).first {
             modelContext.delete(route)
             try modelContext.save()
         }
     }
     public func updateSteps(
-           _ steps: Int,
-           routeId: UUID
-       ) async throws {
-           let descriptor = FetchDescriptor<RouteSD>(
-               predicate: #Predicate { route in
-                   route.id == routeId
-               }
-           )
-
-           guard let route = try modelContext.fetch(descriptor).first else {
-               throw LocationTrackingMessage.noRouteFound
-           }
-
-           route.steps = steps
-
-           try modelContext.save()
-       }
+        _ steps: Int,
+        routeId: UUID
+    ) async throws {
+        let descriptor = FetchDescriptor<RouteSD>(
+            predicate: #Predicate { route in
+                route.id == routeId
+            }
+        )
+        
+        guard let route = try modelContext.fetch(descriptor).first else {
+            throw LocationTrackingMessage.noRouteFound
+        }
+        
+        route.steps = steps
+        
+        try modelContext.save()
+    }
 }

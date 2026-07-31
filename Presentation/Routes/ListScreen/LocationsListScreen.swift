@@ -6,13 +6,14 @@
 //
 import SwiftUI
 import Swinject
+
 struct LocationsListScreen: View {
     @State private var viewModel: LocationsListViewModel
-
+    
     init(viewModel: LocationsListViewModel = AppContainer.shared.container.resolve(LocationsListViewModel.self)!) {
-            self.viewModel = viewModel
-        }
-
+        self.viewModel = viewModel
+    }
+    
     var body: some View {
         Group {
             if viewModel.routes.isEmpty {

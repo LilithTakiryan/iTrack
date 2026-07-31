@@ -12,42 +12,42 @@ import Foundation
 public final class CoreLocationService: NSObject, LocationTrackingService {
     public let events: AsyncStream<LocationTrackingEvent>
     private let continuation: AsyncStream<LocationTrackingEvent>.Continuation
-
+    
     private let manager = CLLocationManager()
     private var isTracking = false
     private var isTrackingRequested = false
     private var didRequestBackgroundPermission = false
     private var selectedMode: TrackingMode = .foreground
     private var lastEmittedLocation: CLLocation?
-
+    
     public override init() {
         var streamContinuation: AsyncStream<LocationTrackingEvent>.Continuation!
         self.events = AsyncStream { cont in
             streamContinuation = cont
         }
         self.continuation = streamContinuation
-
+        
         super.init()
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyBest
         manager.activityType = .fitness
         manager.pausesLocationUpdatesAutomatically = false
     }
-
+    
     public func startTracking(mode: TrackingMode) {
         selectedMode = mode
         isTrackingRequested = true
         send(.statusUpdated(statusText: LocationTrackingMessage.starting.rawValue, isTrackingRequested: true))
-
+        
         if manager.authorizationStatus == .notDetermined {
             send(.statusUpdated(statusText: LocationTrackingMessage.requestingPermission.rawValue, isTrackingRequested: true))
             manager.requestWhenInUseAuthorization()
             return
         }
-
+        
         handleAuthorizationChange()
     }
-
+    
     public func requestPermission() {
         switch manager.authorizationStatus {
         case .notDetermined:
@@ -61,16 +61,16 @@ public final class CoreLocationService: NSObject, LocationTrackingService {
             requireSettings(message: .permissionRequired)
         }
     }
-
+    
     public func stopTracking() {
         isTrackingRequested = false
         stopUpdates()
         send(.statusUpdated(statusText: LocationTrackingMessage.notTracking.rawValue, isTrackingRequested: false))
     }
-
+    
     public func handleScenePhase(isBackground: Bool) {
         guard isTrackingRequested else { return }
-
+        
         if isBackground, manager.authorizationStatus != .authorizedAlways {
             stopUpdates()
             send(.statusUpdated(statusText: LocationTrackingMessage.pausedInBackground.rawValue, isTrackingRequested: true))
@@ -78,13 +78,13 @@ public final class CoreLocationService: NSObject, LocationTrackingService {
             startTracking(mode: selectedMode)
         }
     }
-
+    
     private func startWhenInUseTracking() {
         guard selectedMode == .background else {
             startUpdates(allowsBackground: false)
             return
         }
-
+        
         if didRequestBackgroundPermission {
             requireSettings(message: .backgroundPermissionRequired)
         } else {
@@ -93,22 +93,22 @@ public final class CoreLocationService: NSObject, LocationTrackingService {
             manager.requestAlwaysAuthorization()
         }
     }
-
+    
     private func startUpdates(allowsBackground: Bool) {
         manager.allowsBackgroundLocationUpdates = allowsBackground
-
+        
         if !isTracking {
             manager.startUpdatingLocation()
             isTracking = true
         }
-
+        
         let statusMessage: LocationTrackingMessage = allowsBackground ? .trackingInBackground : .tracking
         send(.statusUpdated(
             statusText: statusMessage.rawValue,
             isTrackingRequested: true
         ))
     }
-
+    
     private func stopUpdates() {
         if isTracking {
             manager.stopUpdatingLocation()
@@ -116,13 +116,13 @@ public final class CoreLocationService: NSObject, LocationTrackingService {
         }
         manager.allowsBackgroundLocationUpdates = false
     }
-
+    
     private func requireSettings(message: LocationTrackingMessage) {
         isTrackingRequested = false
         stopUpdates()
         send(.requireSettings(message: message.rawValue))
     }
-
+    
     private func handleAuthorizationChange() {
         switch manager.authorizationStatus {
         case .denied, .restricted:
@@ -137,7 +137,7 @@ public final class CoreLocationService: NSObject, LocationTrackingService {
             requireSettings(message: .permissionRequired)
         }
     }
-
+    
     private func processLocation(_ location: CLLocation) {
         guard CLLocationCoordinate2DIsValid(location.coordinate) else {
             send(.rejectedLocation)
@@ -148,30 +148,30 @@ public final class CoreLocationService: NSObject, LocationTrackingService {
             send(.rejectedLocation)
             return
         }
-  
-        #if targetEnvironment(simulator)
+        
+#if targetEnvironment(simulator)
         let maxAge: TimeInterval = 120 // 2 minutes for simulator testing
-        #else
+#else
         let maxAge: TimeInterval = 15  // 15 seconds for real-world movement
-        #endif
+#endif
         
         guard abs(location.timestamp.timeIntervalSinceNow) <= maxAge else {
             send(.rejectedLocation)
             return
         }
-
+        
         lastEmittedLocation = location
-
+        
         let domainPoint = LocationPoint(
             latitude: location.coordinate.latitude,
             longitude: location.coordinate.longitude,
             accuracy: location.horizontalAccuracy,
             timestamp: location.timestamp
         )
-
+        
         send(.locationReceived(domainPoint))
     }
-
+    
     private func send(_ event: LocationTrackingEvent) {
         continuation.yield(event)
     }
@@ -184,14 +184,14 @@ extension CoreLocationService: CLLocationManagerDelegate {
             self.handleAuthorizationChange()
         }
     }
-
+    
     nonisolated public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         Task { @MainActor [weak self] in
             guard let self, let location = locations.last else { return }
             self.processLocation(location)
         }
     }
-
+    
     nonisolated public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         Task { @MainActor [weak self] in
             guard let self else { return }
@@ -200,14 +200,14 @@ extension CoreLocationService: CLLocationManagerDelegate {
                 send(.statusUpdated(statusText: error.localizedDescription, isTrackingRequested: isTrackingRequested))
                 return
             }
-
+            
             switch clError.code {
             case .locationUnknown:
                 print("CoreLocation temporary fix delay (error 0). Waiting for update...")
-
+                
             case .denied:
                 requireSettings(message: .permissionRequired)
-
+                
             default:
                 send(.statusUpdated(statusText: error.localizedDescription, isTrackingRequested: isTrackingRequested))
             }

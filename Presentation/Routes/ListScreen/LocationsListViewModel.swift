@@ -13,11 +13,11 @@ final class LocationsListViewModel {
     var routes: [Route] = []
     
     @ObservationIgnored private let repository: LocationRepository
-
+    
     init(repository: LocationRepository) {
         self.repository = repository
     }
-
+    
     func fetchRoutes() async {
         do {
             routes = try await repository.fetchRoutes()
@@ -25,7 +25,7 @@ final class LocationsListViewModel {
             print("Failed to fetch routes:", error)
         }
     }
-
+    
     func delete(offsets: IndexSet) {
         let routesToDelete = offsets.map { routes[$0] }
         
