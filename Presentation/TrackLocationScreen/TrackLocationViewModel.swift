@@ -12,7 +12,7 @@ import MapKit
 
 @MainActor
 @Observable
-final class ContentViewModel {
+final class TrackLocationViewModel {
     var selectedMode: TrackingMode = .foreground {
         didSet {
             guard isTrackingRequested, selectedMode != oldValue else { return }
@@ -146,7 +146,7 @@ final class ContentViewModel {
     }
 }
 
-extension ContentViewModel {
+extension TrackLocationViewModel {
     
     var validLocations: [LocationPoint] {
         liveLocations

@@ -27,8 +27,8 @@ struct iTrackApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView(
-                viewModel: ContentViewModel(
+            TrackLocationScreen(
+                viewModel: TrackLocationViewModel(
                     trackerService: locationService,
                     repository: repository, stepCounter: stepCounter
                 ),

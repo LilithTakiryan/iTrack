@@ -41,6 +41,80 @@
 			);
 			target = 134B6F53301909D60018AA69 /* iTrack */;
 		};
+		13A38720301D3F1D0020E686 /* Exceptions for "Sensors" folder in "iTrack" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				CoreMotionStepCounter.swift,
+			);
+			target = 134B6F53301909D60018AA69 /* iTrack */;
+		};
+		13A38721301D3F1D0020E686 /* Exceptions for "Service" folder in "iTrack" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				CoreLocationService.swift,
+				LocationTrackingMessage.swift,
+			);
+			target = 134B6F53301909D60018AA69 /* iTrack */;
+		};
+		13A38722301D3F1D0020E686 /* Exceptions for "SwiftData+Repo" folder in "iTrack" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				SwiftDataLocationRepository.swift,
+			);
+			target = 134B6F53301909D60018AA69 /* iTrack */;
+		};
+		13A3873A301D3F2D0020E686 /* Exceptions for "Entities" folder in "iTrack" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				LocationPoint.swift,
+				Route.swift,
+				TrackingMode.swift,
+			);
+			target = 134B6F53301909D60018AA69 /* iTrack */;
+		};
+		13A3873B301D3F2D0020E686 /* Exceptions for "Protocols" folder in "iTrack" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				LocationRepository.swift,
+				LocationTrackingEvent.swift,
+				LocationTrackingService.swift,
+				StepCounter.swift,
+			);
+			target = 134B6F53301909D60018AA69 /* iTrack */;
+		};
+		13A3876A301D3F370020E686 /* Exceptions for "Constants" folder in "iTrack" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Labels.swift,
+				sampleData.swift,
+			);
+			target = 134B6F53301909D60018AA69 /* iTrack */;
+		};
+		13A3876B301D3F370020E686 /* Exceptions for "Routes" folder in "iTrack" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Detail/RouteDetailScreen.swift,
+				Detail/RouteInfoCardView.swift,
+				Detail/RouteMapView.swift,
+				ListScreen/Reusables/EmptyListView.swift,
+				ListScreen/Reusables/RouteRowView.swift,
+				ListScreen/TrackedLocationsView.swift,
+				ListScreen/TrackedLocationsViewModel.swift,
+			);
+			target = 134B6F53301909D60018AA69 /* iTrack */;
+		};
+		13A3876C301D3F370020E686 /* Exceptions for "TrackLocationScreen" folder in "iTrack" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Reusables/LastLocationSection.swift,
+				Reusables/MiniTelemetryCard.swift,
+				Reusables/StatusBadgeView.swift,
+				Reusables/TrackButton.swift,
+				TrackLocationScreen.swift,
+				TrackLocationViewModel.swift,
+			);
+			target = 134B6F53301909D60018AA69 /* iTrack */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -60,6 +134,85 @@
 		134B6F70301909D70018AA69 /* iTrackUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = iTrackUITests;
+			sourceTree = "<group>";
+		};
+		13A38712301D3F1C0020E686 /* Models */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Models;
+			sourceTree = "<group>";
+		};
+		13A38714301D3F1C0020E686 /* Sensors */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				13A38720301D3F1D0020E686 /* Exceptions for "Sensors" folder in "iTrack" target */,
+			);
+			path = Sensors;
+			sourceTree = "<group>";
+		};
+		13A38717301D3F1C0020E686 /* Service */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				13A38721301D3F1D0020E686 /* Exceptions for "Service" folder in "iTrack" target */,
+			);
+			path = Service;
+			sourceTree = "<group>";
+		};
+		13A38719301D3F1C0020E686 /* SwiftData+Repo */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				13A38722301D3F1D0020E686 /* Exceptions for "SwiftData+Repo" folder in "iTrack" target */,
+			);
+			path = "SwiftData+Repo";
+			sourceTree = "<group>";
+		};
+		13A38726301D3F2C0020E686 /* Entities */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				13A3873A301D3F2D0020E686 /* Exceptions for "Entities" folder in "iTrack" target */,
+			);
+			path = Entities;
+			sourceTree = "<group>";
+		};
+		13A3872B301D3F2C0020E686 /* Protocols */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				13A3873B301D3F2D0020E686 /* Exceptions for "Protocols" folder in "iTrack" target */,
+			);
+			path = Protocols;
+			sourceTree = "<group>";
+		};
+		13A3872F301D3F2C0020E686 /* UseCases */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = UseCases;
+			sourceTree = "<group>";
+		};
+		13A3873E301D3F360020E686 /* Constants */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				13A3876A301D3F370020E686 /* Exceptions for "Constants" folder in "iTrack" target */,
+			);
+			path = Constants;
+			sourceTree = "<group>";
+		};
+		13A38743301D3F360020E686 /* Helpers */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Helpers;
+			sourceTree = "<group>";
+		};
+		13A3874E301D3F360020E686 /* Routes */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				13A3876B301D3F370020E686 /* Exceptions for "Routes" folder in "iTrack" target */,
+			);
+			path = Routes;
+			sourceTree = "<group>";
+		};
+		13A38756301D3F360020E686 /* TrackLocationScreen */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				13A3876C301D3F370020E686 /* Exceptions for "TrackLocationScreen" folder in "iTrack" target */,
+			);
+			path = TrackLocationScreen;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -93,6 +246,10 @@
 		134B6F4B301909D60018AA69 = {
 			isa = PBXGroup;
 			children = (
+				13A3870E301D3F0F0020E686 /* Core */,
+				13A3870D301D3F080020E686 /* Presentation */,
+				13A3870C301D3EFF0020E686 /* Domain */,
+				13A3870B301D3EFA0020E686 /* Data */,
 				134B6F56301909D60018AA69 /* iTrack */,
 				134B6F66301909D70018AA69 /* iTrackTests */,
 				134B6F70301909D70018AA69 /* iTrackUITests */,
@@ -108,6 +265,53 @@
 				134B6F6D301909D70018AA69 /* iTrackUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		13A3870B301D3EFA0020E686 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				13A38712301D3F1C0020E686 /* Models */,
+				13A38714301D3F1C0020E686 /* Sensors */,
+				13A38717301D3F1C0020E686 /* Service */,
+				13A38719301D3F1C0020E686 /* SwiftData+Repo */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		13A3870C301D3EFF0020E686 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				13A38726301D3F2C0020E686 /* Entities */,
+				13A3872B301D3F2C0020E686 /* Protocols */,
+				13A3872F301D3F2C0020E686 /* UseCases */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		13A3870D301D3F080020E686 /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				13A3873E301D3F360020E686 /* Constants */,
+				13A38743301D3F360020E686 /* Helpers */,
+				13A3874E301D3F360020E686 /* Routes */,
+				13A38756301D3F360020E686 /* TrackLocationScreen */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
+		13A3870E301D3F0F0020E686 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				13A3870F301D3F130020E686 /* DI */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		13A3870F301D3F130020E686 /* DI */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = DI;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -127,6 +331,9 @@
 			);
 			fileSystemSynchronizedGroups = (
 				134B6F56301909D60018AA69 /* iTrack */,
+				13A38712301D3F1C0020E686 /* Models */,
+				13A3872F301D3F2C0020E686 /* UseCases */,
+				13A38743301D3F360020E686 /* Helpers */,
 			);
 			name = iTrack;
 			packageProductDependencies = (

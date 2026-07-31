@@ -7,15 +7,15 @@
 import SwiftUI
 import MapKit
 
-struct ContentView: View {
+struct TrackLocationScreen: View {
     @Environment(\.scenePhase) private var scenePhase
-    @State private var viewModel: ContentViewModel
+    @State private var viewModel: TrackLocationViewModel
     @State private var mapPosition: MapCameraPosition = .automatic
     @AppStorage("distanceUnit") private var distanceUnit = DistanceUnit.metric.rawValue
     
     private let repository: LocationRepository
 
-    init(viewModel: ContentViewModel, repository: LocationRepository) {
+    init(viewModel: TrackLocationViewModel, repository: LocationRepository) {
         self._viewModel = State(initialValue: viewModel)
         self.repository = repository
     }
