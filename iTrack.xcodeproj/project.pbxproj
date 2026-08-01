@@ -98,7 +98,7 @@
 			);
 			target = 134B6F53301909D60018AA69 /* iTrack */;
 		};
-		13A3876B301D3F370020E686 /* Exceptions for "Routes" folder in "iTrack" target */ = {
+		13A3876B301D3F370020E686 /* Exceptions for "RoutesList" folder in "iTrack" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Detail/Reusables/RouteInfoCardView.swift,
@@ -111,7 +111,7 @@
 			);
 			target = 134B6F53301909D60018AA69 /* iTrack */;
 		};
-		13A3876C301D3F370020E686 /* Exceptions for "TrackLocationScreen" folder in "iTrack" target */ = {
+		13A3876C301D3F370020E686 /* Exceptions for "MainScreen" folder in "iTrack" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				MainScreen.swift,
@@ -209,20 +209,20 @@
 			path = Helpers;
 			sourceTree = "<group>";
 		};
-		13A3874E301D3F360020E686 /* Routes */ = {
+		13A3874E301D3F360020E686 /* RoutesList */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				13A3876B301D3F370020E686 /* Exceptions for "Routes" folder in "iTrack" target */,
+				13A3876B301D3F370020E686 /* Exceptions for "RoutesList" folder in "iTrack" target */,
 			);
-			path = Routes;
+			path = RoutesList;
 			sourceTree = "<group>";
 		};
-		13A38756301D3F360020E686 /* TrackLocationScreen */ = {
+		13A38756301D3F360020E686 /* MainScreen */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				13A3876C301D3F370020E686 /* Exceptions for "TrackLocationScreen" folder in "iTrack" target */,
+				13A3876C301D3F370020E686 /* Exceptions for "MainScreen" folder in "iTrack" target */,
 			);
-			path = TrackLocationScreen;
+			path = MainScreen;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -303,8 +303,8 @@
 			children = (
 				13A3873E301D3F360020E686 /* Constants */,
 				13A38743301D3F360020E686 /* Helpers */,
-				13A3874E301D3F360020E686 /* Routes */,
-				13A38756301D3F360020E686 /* TrackLocationScreen */,
+				13A3874E301D3F360020E686 /* RoutesList */,
+				13A38756301D3F360020E686 /* MainScreen */,
 			);
 			path = Presentation;
 			sourceTree = "<group>";
