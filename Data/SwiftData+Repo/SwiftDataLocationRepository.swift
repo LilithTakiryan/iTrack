@@ -56,17 +56,19 @@ public actor SwiftDataLocationRepository: LocationRepository {
         _ steps: Int,
         routeId: UUID
     ) async throws {
-        let descriptor = FetchDescriptor<RouteSD>(
+        var descriptor = FetchDescriptor<RouteSD>(
             predicate: #Predicate { route in
                 route.id == routeId
             }
         )
+        descriptor.fetchLimit = 1
         
         guard let route = try modelContext.fetch(descriptor).first else {
             throw LocationTrackingMessage.noRouteFound
         }
         
         route.steps = steps
+        route.endedAt = Date()
         
         try modelContext.save()
     }

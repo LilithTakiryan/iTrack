@@ -30,7 +30,9 @@ public final class StopTrackingUseCase: StopTrackingUseCaseProtocol {
     public func execute(routeId: UUID) async throws -> Int {
         await trackerService.stopTracking()
         let finalSteps = stepCounter.stop()
+
         try await repository.updateSteps(finalSteps, routeId: routeId)
+        
         return finalSteps
     }
 }
