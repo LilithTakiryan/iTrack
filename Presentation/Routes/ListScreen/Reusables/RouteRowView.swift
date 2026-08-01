@@ -10,18 +10,12 @@ import SwiftUI
 struct RouteRowView: View {
     let route: Route
 
-    private static let durationFormatter: DateComponentsFormatter = {
-        let formatter = DateComponentsFormatter()
-        formatter.allowedUnits = [.hour, .minute, .second]
-        formatter.unitsStyle = .abbreviated
-        formatter.maximumUnitCount = 2
-        return formatter
-    }()
-
     private var duration: String? {
-        let interval = route.endedAt.timeIntervalSince(route.startedAt)
-        guard interval > 0 else { return nil }
-        return Self.durationFormatter.string(from: interval)
+        let formatted = RouteDurationFormatter.format(
+            startedAt: route.startedAt,
+            endedAt: route.endedAt
+        )
+        return formatted == "0m" ? nil : formatted
     }
 
     private var timeRange: String {
