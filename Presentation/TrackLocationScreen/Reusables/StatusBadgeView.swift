@@ -26,10 +26,7 @@ struct MapTagView: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 5.5)
-        .background(
-            Capsule()
-                .fill(isActiveStyle ? AnyShapeStyle(Color.green.opacity(0.15)) : AnyShapeStyle(.ultraThinMaterial))
-        )
+        .background(Capsule().fill(AnyShapeStyle(.ultraThinMaterial)))
         .shadow(
             color: isActiveStyle ? .clear : .black.opacity(0.1),
             radius: 4, y: 2

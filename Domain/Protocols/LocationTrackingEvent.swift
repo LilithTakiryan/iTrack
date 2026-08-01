@@ -13,4 +13,5 @@ public enum LocationTrackingEvent: Sendable {
     case requireSettings(message: String)
     case locationReceived(LocationPoint)
     case rejectedLocation
+    case trackingError(message: String)
 }

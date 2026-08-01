@@ -23,12 +23,15 @@ final class MainViewModel {
         }
     }
     
-    var statusText = "Not tracking"
+    var statusText = LocationTrackingMessage.notTracking.rawValue
+    var lastErrorMessage: String?
+    var showLocationPermissionAlert = false
+    private(set) var isTrackingRequested = false
+    private(set) var trackingState: TrackingState = .idle
+    
     var lastLocation: LocationPoint?
     var liveLocations: [LocationPoint] = []
     var rejectedLocationCount = 0
-    var showLocationPermissionAlert = false
-    private(set) var isTrackingRequested = false
     var steps: Int = 0
     private let startTrackingUseCase: StartTrackingUseCaseProtocol
     private let stopTrackingUseCase: StopTrackingUseCaseProtocol
@@ -92,7 +95,10 @@ final class MainViewModel {
                 
                 self.steps = finalSteps
             } catch {
-                print("Failed to stop route:", error)
+                self.statusText = error.localizedDescription
+                self.lastErrorMessage = error.localizedDescription
+                self.trackingState = .serviceError
+                self.isTrackingRequested = false
             }
             
             self.currentRoute = nil
@@ -114,16 +120,28 @@ final class MainViewModel {
                 case let .statusUpdated(status, isTrackingRequested):
                     self.statusText = status
                     self.isTrackingRequested = isTrackingRequested
-                    
+                    self.showLocationPermissionAlert = false
+                    self.lastErrorMessage = nil
+                    self.trackingState = TrackingStateResolver.resolve(statusText: status, isTrackingRequested: isTrackingRequested)
+
                 case let .requireSettings(message):
                     self.statusText = message
                     self.isTrackingRequested = false
                     self.showLocationPermissionAlert = true
-                    
+                    self.lastErrorMessage = message
+                    self.trackingState = .requiresSettings
+
+                case let .trackingError(message):
+                    self.statusText = message
+                    self.isTrackingRequested = false
+                    self.showLocationPermissionAlert = false
+                    self.lastErrorMessage = message
+                    self.trackingState = .serviceError
+
                 case let .locationReceived(location):
                     self.lastLocation = location
                     self.liveLocations.append(location)
-                    
+
                     if let route = self.currentRoute {
                         await self.persist(location, for: route)
                     }

@@ -34,11 +34,11 @@ struct MainScreen: View {
                     .frame(height: 240)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
                     .overlay(alignment: .topTrailing) {
-                   MapTagView(
-    title: viewModel.statusText,
-    icon: .statusDot(isActive: viewModel.trackingState.isActive),
-    isActiveStyle: viewModel.trackingState.isActive
-)
+                        MapTagView(
+                            title: viewModel.statusText,
+                            icon: .statusDot(isActive: viewModel.trackingState.isActive),
+                            isActiveStyle: viewModel.trackingState.isActive
+                        )
                         .padding(12)
                     }
                     .overlay(alignment: .bottomTrailing) {
