@@ -11,42 +11,6 @@ import SwiftUI
 import MapKit
 import Swinject
 
-@MainActor
-extension MainViewModel {
-    static func makeDefault(
-        trackerService: LocationTrackingService,
-        repository: LocationRepository,
-        stepCounter: StepCounterService
-    ) -> MainViewModel {
-        let startTrackingUseCase = AppContainer.shared.container.resolve(StartTrackingUseCaseProtocol.self)!
-        let stopTrackingUseCase = AppContainer.shared.container.resolve(StopTrackingUseCaseProtocol.self)!
-        let appendLocationUseCase = AppContainer.shared.container.resolve(AppendLocationUseCaseProtocol.self)!
-        return MainViewModel(
-            state: TrackingViewState(),
-            startTrackingUseCase: startTrackingUseCase,
-            stopTrackingUseCase: stopTrackingUseCase,
-            appendLocationUseCase: appendLocationUseCase,
-            trackerService: trackerService,
-            stepCounter: stepCounter
-        )
-    }
-}
-
-extension MainViewModel {
-    var validLocations: [LocationPoint] {
-        state.liveLocations
-            .filter { CLLocationCoordinate2DIsValid($0.coordinate) }
-            .sorted { $0.timestamp < $1.timestamp }
-    }
-    
-    func formattedDistance(unitRawValue: String) -> String {
-        let unit = DistanceUnit(rawValue: unitRawValue) ?? .metric
-        return RouteDistanceCalculator.formattedDistance(
-            for: validLocations,
-            unit: unit
-        )
-    }
-}
 @Observable
 @MainActor
 final class MainViewModel {
@@ -87,7 +51,6 @@ final class MainViewModel {
         modeChangeTask?.cancel()
     }
     
-    // MARK: - Public Actions
     
     func setMode(_ mode: TrackingMode) {
         guard state.isTrackingRequested, mode != state.selectedMode else {
@@ -145,7 +108,6 @@ final class MainViewModel {
         }
     }
     
-    // MARK: - Private Methods
     
     private func observeTrackerEvents() {
         eventTask = Task { [weak self] in
@@ -183,5 +145,43 @@ final class MainViewModel {
         } catch {
             print("Failed to save location:", error)
         }
+    }
+}
+
+
+@MainActor
+extension MainViewModel {
+    static func makeDefault(
+        trackerService: LocationTrackingService,
+        repository: LocationRepository,
+        stepCounter: StepCounterService
+    ) -> MainViewModel {
+        let startTrackingUseCase = AppContainer.shared.container.resolve(StartTrackingUseCaseProtocol.self)!
+        let stopTrackingUseCase = AppContainer.shared.container.resolve(StopTrackingUseCaseProtocol.self)!
+        let appendLocationUseCase = AppContainer.shared.container.resolve(AppendLocationUseCaseProtocol.self)!
+        return MainViewModel(
+            state: TrackingViewState(),
+            startTrackingUseCase: startTrackingUseCase,
+            stopTrackingUseCase: stopTrackingUseCase,
+            appendLocationUseCase: appendLocationUseCase,
+            trackerService: trackerService,
+            stepCounter: stepCounter
+        )
+    }
+}
+
+extension MainViewModel {
+    var validLocations: [LocationPoint] {
+        state.liveLocations
+            .filter { CLLocationCoordinate2DIsValid($0.coordinate) }
+            .sorted { $0.timestamp < $1.timestamp }
+    }
+    
+    func formattedDistance(unitRawValue: String) -> String {
+        let unit = DistanceUnit(rawValue: unitRawValue) ?? .metric
+        return RouteDistanceCalculator.formattedDistance(
+            for: validLocations,
+            unit: unit
+        )
     }
 }

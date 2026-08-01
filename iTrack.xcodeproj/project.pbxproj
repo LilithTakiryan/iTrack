@@ -114,14 +114,14 @@
 		13A3876C301D3F370020E686 /* Exceptions for "MainScreen" folder in "iTrack" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Helpers/TrackingEventReducer.swift,
+				Helpers/TrackingViewState.swift,
 				MainScreen.swift,
 				MainViewModel.swift,
 				Reusables/LastLocationSection.swift,
 				Reusables/MiniTelemetryCard.swift,
 				Reusables/StatusBadgeView.swift,
 				Reusables/TrackButton.swift,
-				TrackingEventReducer.swift,
-				TrackingViewState.swift,
 			);
 			target = 134B6F53301909D60018AA69 /* iTrack */;
 		};
