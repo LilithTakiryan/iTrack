@@ -15,12 +15,12 @@ public protocol StartTrackingUseCaseProtocol: Sendable {
 public final class StartTrackingUseCase: StartTrackingUseCaseProtocol {
     private let repository: LocationRepository
     private let trackerService: LocationTrackingService
-    private let stepCounter: StepCounter
+    private let stepCounter: StepCounterService
 
     public init(
         repository: LocationRepository,
         trackerService: LocationTrackingService,
-        stepCounter: StepCounter
+        stepCounter: StepCounterService
     ) {
         self.repository = repository
         self.trackerService = trackerService

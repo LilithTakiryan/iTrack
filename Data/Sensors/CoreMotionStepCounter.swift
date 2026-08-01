@@ -7,7 +7,7 @@
 
 import CoreMotion
 
-final class CoreMotionStepCounter: StepCounter {
+final class CoreMotionStepCounter: StepCounterService {
     
     private let pedometer = CMPedometer()
     

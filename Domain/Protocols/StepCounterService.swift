@@ -8,7 +8,7 @@
 import Foundation
 
 
-public protocol StepCounter: AnyObject {
+public protocol StepCounterService: AnyObject {
     var steps: Int { get }
     var onStepsChanged: ((Int) -> Void)? { get set }
 

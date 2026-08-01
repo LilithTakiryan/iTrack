@@ -1,9 +1,10 @@
 //
-//  ContentViewModel.swift
+//  MainViewModel.swift
 //  iTrack
 //
 //  Created by lilit on 29.07.26.
 //
+
 import Foundation
 import Observation
 import SwiftUI
@@ -11,33 +12,52 @@ import MapKit
 import Swinject
 
 @MainActor
-@Observable
-final class MainViewModel {
-    var selectedMode: TrackingMode = .foreground {
-        didSet {
-            guard isTrackingRequested, selectedMode != oldValue else { return }
-            modeChangeTask?.cancel()
-            modeChangeTask = Task {
-                await trackerService.startTracking(mode: selectedMode)
-            }
-        }
+extension MainViewModel {
+    static func makeDefault(
+        trackerService: LocationTrackingService,
+        repository: LocationRepository,
+        stepCounter: StepCounterService
+    ) -> MainViewModel {
+        let startTrackingUseCase = AppContainer.shared.container.resolve(StartTrackingUseCaseProtocol.self)!
+        let stopTrackingUseCase = AppContainer.shared.container.resolve(StopTrackingUseCaseProtocol.self)!
+        let appendLocationUseCase = AppContainer.shared.container.resolve(AppendLocationUseCaseProtocol.self)!
+        return MainViewModel(
+            state: TrackingViewState(),
+            startTrackingUseCase: startTrackingUseCase,
+            stopTrackingUseCase: stopTrackingUseCase,
+            appendLocationUseCase: appendLocationUseCase,
+            trackerService: trackerService,
+            stepCounter: stepCounter
+        )
+    }
+}
+
+extension MainViewModel {
+    var validLocations: [LocationPoint] {
+        state.liveLocations
+            .filter { CLLocationCoordinate2DIsValid($0.coordinate) }
+            .sorted { $0.timestamp < $1.timestamp }
     }
     
-    var statusText = LocationTrackingMessage.notTracking.rawValue
-    var lastErrorMessage: String?
-    var showLocationPermissionAlert = false
-    private(set) var isTrackingRequested = false
-    private(set) var trackingState: TrackingState = .idle
+    func formattedDistance(unitRawValue: String) -> String {
+        let unit = DistanceUnit(rawValue: unitRawValue) ?? .metric
+        return RouteDistanceCalculator.formattedDistance(
+            for: validLocations,
+            unit: unit
+        )
+    }
+}
+@Observable
+@MainActor
+final class MainViewModel {
+    var state: TrackingViewState
     
-    var lastLocation: LocationPoint?
-    var liveLocations: [LocationPoint] = []
-    var rejectedLocationCount = 0
-    var steps: Int = 0
     private let startTrackingUseCase: StartTrackingUseCaseProtocol
     private let stopTrackingUseCase: StopTrackingUseCaseProtocol
+    private let appendLocationUseCase: AppendLocationUseCaseProtocol
+    
     @ObservationIgnored private let trackerService: LocationTrackingService
-    @ObservationIgnored private let repository: LocationRepository
-    @ObservationIgnored private let stepCounter: StepCounter
+    @ObservationIgnored private let stepCounter: StepCounterService
     
     @ObservationIgnored private var eventTask: Task<Void, Never>?
     @ObservationIgnored private var modeChangeTask: Task<Void, Never>?
@@ -45,16 +65,18 @@ final class MainViewModel {
     
     @MainActor
     init(
+        state: TrackingViewState,
         startTrackingUseCase: StartTrackingUseCaseProtocol,
         stopTrackingUseCase: StopTrackingUseCaseProtocol,
+        appendLocationUseCase: AppendLocationUseCaseProtocol,
         trackerService: LocationTrackingService,
-        repository: LocationRepository,
-        stepCounter: StepCounter
+        stepCounter: StepCounterService
     ) {
+        self.state = state
         self.startTrackingUseCase = startTrackingUseCase
         self.stopTrackingUseCase = stopTrackingUseCase
+        self.appendLocationUseCase = appendLocationUseCase
         self.trackerService = trackerService
-        self.repository = repository
         self.stepCounter = stepCounter
         
         observeTrackerEvents()
@@ -63,6 +85,21 @@ final class MainViewModel {
     deinit {
         eventTask?.cancel()
         modeChangeTask?.cancel()
+    }
+    
+    // MARK: - Public Actions
+    
+    func setMode(_ mode: TrackingMode) {
+        guard state.isTrackingRequested, mode != state.selectedMode else {
+            state.selectedMode = mode
+            return
+        }
+        
+        state.selectedMode = mode
+        modeChangeTask?.cancel()
+        modeChangeTask = Task {
+            await trackerService.startTracking(mode: mode)
+        }
     }
     
     func requestLocationPermission() {
@@ -74,12 +111,9 @@ final class MainViewModel {
     func startTracking() {
         Task {
             do {
-                let route = try await startTrackingUseCase.execute(mode: selectedMode)
+                let route = try await startTrackingUseCase.execute(mode: state.selectedMode)
                 self.currentRoute = route
-                self.liveLocations.removeAll()
-                self.lastLocation = nil
-                self.rejectedLocationCount = 0
-                self.steps = 0
+                self.state.reset()
             } catch {
                 print("Failed to start route:", error)
             }
@@ -92,17 +126,16 @@ final class MainViewModel {
             
             do {
                 let finalSteps = try await stopTrackingUseCase.execute(routeId: route.id)
-                
-                self.steps = finalSteps
+                self.state.steps = finalSteps
             } catch {
-                self.statusText = error.localizedDescription
-                self.lastErrorMessage = error.localizedDescription
-                self.trackingState = .serviceError
-                self.isTrackingRequested = false
+                self.state.statusText = error.localizedDescription
+                self.state.lastErrorMessage = error.localizedDescription
+                self.state.trackingState = .serviceError
+                self.state.isTrackingRequested = false
             }
             
             self.currentRoute = nil
-            self.isTrackingRequested = false
+            self.state.isTrackingRequested = false
         }
     }
     
@@ -112,84 +145,43 @@ final class MainViewModel {
         }
     }
     
+    // MARK: - Private Methods
+    
     private func observeTrackerEvents() {
         eventTask = Task { [weak self] in
             guard let self else { return }
             for await event in trackerService.events {
-                switch event {
-                case let .statusUpdated(status, isTrackingRequested):
-                    self.statusText = status
-                    self.isTrackingRequested = isTrackingRequested
-                    self.showLocationPermissionAlert = false
-                    self.lastErrorMessage = nil
-                    self.trackingState = TrackingStateResolver.resolve(statusText: status, isTrackingRequested: isTrackingRequested)
-
-                case let .requireSettings(message):
-                    self.statusText = message
-                    self.isTrackingRequested = false
-                    self.showLocationPermissionAlert = true
-                    self.lastErrorMessage = message
-                    self.trackingState = .requiresSettings
-
-                case let .trackingError(message):
-                    self.statusText = message
-                    self.isTrackingRequested = false
-                    self.showLocationPermissionAlert = false
-                    self.lastErrorMessage = message
-                    self.trackingState = .serviceError
-
-                case let .locationReceived(location):
-                    self.lastLocation = location
-                    self.liveLocations.append(location)
-
-                    if let route = self.currentRoute {
-                        await self.persist(location, for: route)
-                    }
-                    
-                case .rejectedLocation:
-                    self.rejectedLocationCount += 1
-                }
+                let result = TrackingEventReducer.reduce(event)
+                self.applyReducerResult(result)
             }
+        }
+    }
+    
+    private func applyReducerResult(_ result: TrackingEventReducer.Result) {
+        if let status = result.statusText { state.statusText = status }
+        if let requested = result.isTrackingRequested { state.isTrackingRequested = requested }
+        if let alert = result.showLocationPermissionAlert { state.showLocationPermissionAlert = alert }
+        if let errorMsg = result.lastErrorMessage { state.lastErrorMessage = errorMsg }
+        if let trackingState = result.trackingState { state.trackingState = trackingState }
+        if let location = result.lastLocation { state.lastLocation = location }
+        
+        if let newLocation = result.newLocationToAppend {
+            state.liveLocations.append(newLocation)
+            if let route = currentRoute {
+                Task { await self.persist(newLocation, for: route) }
+            }
+        }
+        
+        if result.didRejectLocation {
+            state.rejectedLocationCount += 1
         }
     }
     
     private func persist(_ location: LocationPoint, for route: Route) async {
         do {
-            try await repository.addLocation(location, to: route.id)
+            try await appendLocationUseCase.execute(location, for: route.id)
         } catch {
             print("Failed to save location:", error)
         }
-    }
-}
-
-@MainActor
-extension MainViewModel {
-    static func makeDefault(trackerService: LocationTrackingService, repository: LocationRepository, stepCounter: StepCounter) -> MainViewModel {
-        let startTrackingUseCase = AppContainer.shared.container.resolve(StartTrackingUseCaseProtocol.self)!
-        let stopTrackingUseCase = AppContainer.shared.container.resolve(StopTrackingUseCaseProtocol.self)!
-        return MainViewModel(
-            startTrackingUseCase: startTrackingUseCase,
-            stopTrackingUseCase: stopTrackingUseCase,
-            trackerService: trackerService,
-            repository: repository,
-            stepCounter: stepCounter
-        )
-    }
-}
-
-extension MainViewModel {
-    
-    var validLocations: [LocationPoint] {
-        liveLocations
-            .filter { CLLocationCoordinate2DIsValid($0.coordinate) }
-            .sorted { $0.timestamp < $1.timestamp }
-    }
-    
-    func formattedDistance(unitRawValue: String) -> String {
-        let unit = DistanceUnit(rawValue: unitRawValue) ?? .metric
-        return RouteDistanceCalculator.formattedDistance(
-            for: validLocations,
-            unit: unit
-        )
     }
 }

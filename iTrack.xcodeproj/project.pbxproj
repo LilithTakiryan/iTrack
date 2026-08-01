@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		132D5BFE301DDEA500642852 /* Container+UseCases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 132D5BFD301DDEA400642852 /* Container+UseCases.swift */; };
+		132D5C00301DDECA00642852 /* Container+ViewModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 132D5BFF301DDEC700642852 /* Container+ViewModels.swift */; };
+		132D5C03301DDFE900642852 /* Container+Core.swift in Sources */ = {isa = PBXBuildFile; fileRef = 132D5C02301DDFE400642852 /* Container+Core.swift */; };
 		134B6F8330190AB50018AA69 /* Swinject in Frameworks */ = {isa = PBXBuildFile; productRef = 134B6F8230190AB50018AA69 /* Swinject */; };
 		13A38771301D42240020E686 /* AppContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13A38770301D417C0020E686 /* AppContainer.swift */; };
 /* End PBXBuildFile section */
@@ -29,6 +32,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		132D5BFD301DDEA400642852 /* Container+UseCases.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Container+UseCases.swift"; sourceTree = "<group>"; };
+		132D5BFF301DDEC700642852 /* Container+ViewModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Container+ViewModels.swift"; sourceTree = "<group>"; };
+		132D5C02301DDFE400642852 /* Container+Core.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Container+Core.swift"; sourceTree = "<group>"; };
 		134B6F54301909D60018AA69 /* iTrack.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iTrack.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		134B6F63301909D70018AA69 /* iTrackTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iTrackTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		134B6F6D301909D70018AA69 /* iTrackUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iTrackUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -80,7 +86,7 @@
 				LocationRepository.swift,
 				LocationTrackingEvent.swift,
 				LocationTrackingService.swift,
-				StepCounter.swift,
+				StepCounterService.swift,
 			);
 			target = 134B6F53301909D60018AA69 /* iTrack */;
 		};
@@ -114,6 +120,8 @@
 				Reusables/MiniTelemetryCard.swift,
 				Reusables/StatusBadgeView.swift,
 				Reusables/TrackButton.swift,
+				TrackingEventReducer.swift,
+				TrackingViewState.swift,
 			);
 			target = 134B6F53301909D60018AA69 /* iTrack */;
 		};
@@ -312,6 +320,9 @@
 		13A3870F301D3F130020E686 /* DI */ = {
 			isa = PBXGroup;
 			children = (
+				132D5C02301DDFE400642852 /* Container+Core.swift */,
+				132D5BFF301DDEC700642852 /* Container+ViewModels.swift */,
+				132D5BFD301DDEA400642852 /* Container+UseCases.swift */,
 				13A38770301D417C0020E686 /* AppContainer.swift */,
 			);
 			path = DI;
@@ -469,7 +480,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				132D5C03301DDFE900642852 /* Container+Core.swift in Sources */,
+				132D5C00301DDECA00642852 /* Container+ViewModels.swift in Sources */,
 				13A38771301D42240020E686 /* AppContainer.swift in Sources */,
+				132D5BFE301DDEA500642852 /* Container+UseCases.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
