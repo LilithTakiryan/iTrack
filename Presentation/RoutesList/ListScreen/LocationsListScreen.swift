@@ -9,9 +9,10 @@ import Swinject
 
 struct LocationsListScreen: View {
     @State private var viewModel: LocationsListViewModel
-    
-    init(viewModel: LocationsListViewModel = AppContainer.shared.container.resolve(LocationsListViewModel.self)!) {
-        self.viewModel = viewModel
+
+    init(viewModel: LocationsListViewModel? = nil) {
+        let resolvedViewModel = viewModel ?? AppContainer.shared.container.resolve(LocationsListViewModel.self)!
+        self._viewModel = State(wrappedValue: resolvedViewModel)
     }
     
     var body: some View {

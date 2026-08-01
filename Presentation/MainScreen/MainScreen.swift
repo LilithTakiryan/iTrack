@@ -14,15 +14,12 @@ struct MainScreen: View {
     @State private var mapPosition: MapCameraPosition = .automatic
     @AppStorage("distanceUnit") private var distanceUnit = DistanceUnit.metric.rawValue
     
-    @Bindable var viewModel: MainViewModel
-    
+    @State var viewModel: MainViewModel
+
     @MainActor
     init(viewModel: MainViewModel? = nil) {
-        if let viewModel {
-            self.viewModel = viewModel
-        } else {
-            self.viewModel = AppContainer.shared.container.resolve(MainViewModel.self)!
-        }
+        let resolvedViewModel = viewModel ?? AppContainer.shared.container.resolve(MainViewModel.self)!
+        self._viewModel = State(wrappedValue: resolvedViewModel)
     }
     
     var body: some View {
