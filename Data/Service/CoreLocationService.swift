@@ -71,10 +71,20 @@ public final class CoreLocationService: NSObject, LocationTrackingService {
     public func handleScenePhase(isBackground: Bool) {
         guard isTrackingRequested else { return }
 
-        if isBackground, currentAuthorizationStatus != .authorizedAlways {
-            stopUpdates()
-            send(.statusUpdated(statusText: LocationTrackingMessage.pausedInBackground.rawValue, isTrackingRequested: true))
-        } else if !isBackground {
+        if isBackground {
+            if selectedMode == .background, currentAuthorizationStatus == .authorizedAlways {
+                send(.statusUpdated(
+                    statusText: LocationTrackingMessage.trackingInBackground.rawValue,
+                    isTrackingRequested: true
+                ))
+            } else {
+                stopUpdates()
+                send(.statusUpdated(
+                    statusText: LocationTrackingMessage.pausedInBackground.rawValue,
+                    isTrackingRequested: true
+                ))
+            }
+        } else {
             startTracking(mode: selectedMode)
         }
     }
@@ -96,6 +106,7 @@ public final class CoreLocationService: NSObject, LocationTrackingService {
     
     public func stopTracking() {
         isTrackingRequested = false
+        didRequestBackgroundPermission = false
         stopUpdates()
         send(.statusUpdated(statusText: LocationTrackingMessage.notTracking.rawValue, isTrackingRequested: false))
     }
@@ -105,13 +116,25 @@ public final class CoreLocationService: NSObject, LocationTrackingService {
             startUpdates(allowsBackground: false)
             return
         }
-        
-        if didRequestBackgroundPermission {
-            requireSettings(message: .backgroundPermissionRequired)
-        } else {
+
+        if currentAuthorizationStatus == .authorizedAlways {
+            startUpdates(allowsBackground: true)
+            return
+        }
+        startUpdates(allowsBackground: false)
+
+        if !didRequestBackgroundPermission {
             didRequestBackgroundPermission = true
-            send(.statusUpdated(statusText: LocationTrackingMessage.requestingBackgroundPermission.rawValue, isTrackingRequested: true))
+            send(.statusUpdated(
+                statusText: LocationTrackingMessage.requestingBackgroundPermission.rawValue,
+                isTrackingRequested: true
+            ))
             manager.requestAlwaysAuthorization()
+        } else {
+            send(.statusUpdated(
+                statusText: LocationTrackingMessage.tracking.rawValue,
+                isTrackingRequested: true
+            ))
         }
     }
     
