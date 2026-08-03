@@ -20,6 +20,34 @@
                ReferencedContainer = "container:iTrack.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForRunning = "NO"
+            buildForTesting = "YES"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "134B6F62301909D70018AA69"
+               BuildableName = "iTrackTests.xctest"
+               BlueprintName = "iTrackTests"
+               ReferencedContainer = "container:iTrack.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForRunning = "NO"
+            buildForTesting = "YES"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "134B6F6C301909D70018AA69"
+               BuildableName = "iTrackUITests.xctest"
+               BlueprintName = "iTrackUITests"
+               ReferencedContainer = "container:iTrack.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -28,8 +56,6 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES"
       shouldPreallocateConfigurations = "NO">
-      <TestPlans>
-      </TestPlans>
       <Testables>
          <TestableReference
             skipped = "NO">
