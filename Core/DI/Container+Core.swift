@@ -15,7 +15,16 @@ extension AppContainer {
         // MARK: - SwiftData ModelContainer
         container.register(ModelContainer.self) { _ in
             do {
-                return try ModelContainer(for: RouteSD.self, LocationPointSD.self)
+                let schema = Schema([
+                    RouteSD.self,
+                    LocationPointSD.self
+                ])
+                let configuration = ModelConfiguration(schema: schema)
+                return try ModelContainer(
+                    for: schema,
+                    migrationPlan: iTrackMigrationPlan.self,
+                    configurations: [configuration]
+                )
             } catch {
                 fatalError("Failed to initialize SwiftData container: \(error)")
             }

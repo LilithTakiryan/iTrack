@@ -181,7 +181,7 @@ public final class CoreLocationService: NSObject, LocationTrackingService {
 #if targetEnvironment(simulator)
         let maxAge: TimeInterval = 120 // 2 minutes for simulator testing
 #else
-        let maxAge: TimeInterval = 15  // 15 seconds for real-world movement
+        let maxAge: TimeInterval = 30  // 30 seconds for real-world movement
 #endif
         
         guard abs(location.timestamp.timeIntervalSinceNow) <= maxAge else {
