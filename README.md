@@ -2,6 +2,8 @@
 
 iTrack is a robust iOS application designed to track user routes in both foreground and background, providing a seamless experience for monitoring movement and physical activity.
 
+<img src="demo.gif" width="300" alt="iTrack Demo" />
+
 ## Getting Started
 
 ### Prerequisites
